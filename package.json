@@ -4,6 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "core:dev": "npm run -w core build",
+    "core:build": "npm run -w core build",
+    "fe:dev": "npm run -w front-end dev",
+    "fe:build": "npm run -w front-end build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

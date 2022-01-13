@@ -14,5 +14,9 @@
 			"path": "./functions"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"conventionalCommits.scopes": [
+			"core"
+		]
+	}
 }
