@@ -1,11 +1,12 @@
 <template>
   <q-page>
-    VoteResult: {{ votingName }}
+    VoteFinish: {{ voting }}
   </q-page>
 </template>
 
 <script lang="ts" setup>
 import { inject } from 'vue';
+import { VotingEvent } from '@evote/core';
 
-const votingName = inject<string>('VotingEventName');
+const voting = inject<VotingEvent>('VotingEvent');
 </script>

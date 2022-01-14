@@ -133,7 +133,7 @@ const toggleLeftDrawer = () => {
   UIState.leftDrawerOpen = !UIState.leftDrawerOpen;
 };
 
-provide('VotingEventName', votingEvent);
+provide('VotingEvent', votingEvent);
 </script>
 
 <style lang="sass" scoped>
