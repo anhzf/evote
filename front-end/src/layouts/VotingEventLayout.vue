@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          Evote
+          {{ votingEvent.title }}
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
@@ -43,6 +43,19 @@
           </q-item-section>
         </q-item>
       </q-list>
+
+      <q-space />
+
+      <div class="q-pa-lg">
+        <q-btn
+          label="Lihat acara voting saya lainnya"
+          icon="arrow_back"
+          flat
+          size="sm"
+          color="secondary"
+          :to="{ name: 'VotingEvents' }"
+        />
+      </div>
     </q-drawer>
 
     <q-page-container>
@@ -52,25 +65,45 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, provide } from 'vue';
+import { useRoute } from 'vue-router';
 import { Notify } from 'quasar';
+import { VotingEvent } from '@evote/core';
 import { SidebarNavItem } from 'src/types/ui';
 
-const guestNavItems: SidebarNavItem[] = [
+const defaultNavItems = Object.freeze<SidebarNavItem[]>([
   {
-    label: 'Beranda',
-    icon: 'home',
-    to: '/',
+    label: 'Pilih sekarang',
+    icon: 'how_to_vote',
+    to: { name: 'VotingEvent_Vote' },
+  },
+  {
+    label: 'Tentang pemilihan',
+    icon: 'info',
+    to: { name: 'VotingEvent' },
     exact: true,
   },
   {
-    label: 'Acara Voting Saya',
-    icon: 'ballot',
-    to: { name: 'VotingEvents' },
+    label: 'Hasil pemilihan',
+    icon: 'poll',
+    to: { name: 'VotingEvent_Result' },
   },
-];
+]);
 
-const userNavItems: SidebarNavItem[] = [
+const adminNavItems = Object.freeze<SidebarNavItem[]>([
+  {
+    label: 'Daftar Pemilih',
+    icon: 'people',
+    to: { name: 'VotingEvent_Voter' },
+  },
+  {
+    label: 'Pengaturan',
+    icon: 'settings',
+    to: { name: 'VotingEvent_Settings' },
+  },
+]);
+
+const userNavItems = Object.freeze<SidebarNavItem[]>([
   {
     label: 'Keluar',
     icon: 'logout',
@@ -78,12 +111,19 @@ const userNavItems: SidebarNavItem[] = [
     class: 'text-red-6',
     onClick: () => Notify.create('Berhasil keluar!'),
   },
-];
+]);
 
 const navItems = computed(() => [
-  ...guestNavItems,
+  ...defaultNavItems,
+  ...adminNavItems,
   ...userNavItems,
 ]);
+
+const route = useRoute();
+const votingEvent = computed(() => new VotingEvent().fill({
+  title: 'Pemilihan Presiden OSIS SMPN 23 Surakarta',
+  url: String(route.params.votingEventName),
+}));
 
 const UIState = reactive({
   leftDrawerOpen: false,
@@ -92,6 +132,8 @@ const UIState = reactive({
 const toggleLeftDrawer = () => {
   UIState.leftDrawerOpen = !UIState.leftDrawerOpen;
 };
+
+provide('VotingEventName', votingEvent);
 </script>
 
 <style lang="sass" scoped>

@@ -19,7 +19,8 @@
       "source.fixAll": true
     },
 		"conventionalCommits.scopes": [
-			"core"
+			"core",
+			"fe"
 		]
 	}
 }

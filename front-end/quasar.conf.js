@@ -17,7 +17,7 @@ module.exports = configure((ctx) => ({
   supportTS: {
     tsCheckerConfig: {
       eslint: {
-        enabled: true,
+        enabled: process.env.PROD,
         files: './src/**/*.{ts,tsx,js,jsx,vue}',
       },
     },
@@ -53,7 +53,7 @@ module.exports = configure((ctx) => ({
 
   // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
   build: {
-    vueRouterMode: 'hash', // available values: 'hash', 'history'
+    vueRouterMode: 'history', // available values: 'hash', 'history'
 
     // transpile: false,
     // publicPath: '/',
@@ -90,7 +90,11 @@ module.exports = configure((ctx) => ({
 
   // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
   framework: {
-    config: {},
+    config: {
+      ripple: {
+        early: true,
+      },
+    },
 
     // iconSet: 'material-icons', // Quasar icon set
     // lang: 'en-US', // Quasar language pack
@@ -103,7 +107,9 @@ module.exports = configure((ctx) => ({
     // directives: [],
 
     // Quasar plugins
-    plugins: [],
+    plugins: [
+      'Notify',
+    ],
   },
 
   // animations: 'all', // --- includes all animations

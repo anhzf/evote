@@ -1,6 +1,6 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    Ini index
+  <q-page>
+    VotingEventList
   </q-page>
 </template>
 
