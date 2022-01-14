@@ -9,7 +9,7 @@ export interface IBaseEntity {
 
 export class BaseEntity<
   T,
-  ConstructorAttrs extends Partial<T & IBaseEntity> = T & IBaseEntity
+  ConstructorAttrs extends Partial<T & IBaseEntity> = T & IBaseEntity,
 > implements IBaseEntity {
   #tempId = nanoid();
 
@@ -19,22 +19,44 @@ export class BaseEntity<
 
   updatedAt = new Date();
 
+  deletedAt?: Date;
+
   get id() {
     return this.#id || this.#tempId;
   }
 
+  // when setting id, the updatedAt property does not get updated
   set id(v) {
-    // force to assign
-    this.set({ ['#id']: v } as unknown as Partial<T & IBaseEntity>);
+    this.#id = v;
   }
 
-  constructor(attrs: ConstructorAttrs & Partial<T & IBaseEntity>) {
+  // deprecated due to unexpected behaviour
+  // constructor (attrs: ConstructorAttrs & Partial<T & IBaseEntity>) {
+  //   this.set(attrs);
+  // }
+
+  fill(attrs: ConstructorAttrs & Partial<T & IBaseEntity>): this {
     this.set(attrs);
+    return this;
   }
 
-  set(attrs: Partial<T & IBaseEntity>) {
-    Object.assign(this, {
-      updatedAt: new Date(),
-    }, attrs);
+  set(attrs: Partial<T & IBaseEntity>): this {
+    this.updatedAt = new Date();
+
+    Object.entries(attrs)
+      .forEach(([key, value]) => {
+        this[key as keyof BaseEntity<T, ConstructorAttrs>] = value;
+      });
+
+    return this;
+  }
+
+  toObj(trueId = false): IBaseEntity {
+    return {
+      id: trueId ? this.id : (this.#id || ''),
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      deletedAt: this.deletedAt,
+    }
   }
 }

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "core:dev": "npm run -w core build",
+    "core:dev": "npm run -w core dev",
     "core:build": "npm run -w core build",
     "fe:dev": "npm run -w front-end dev",
     "fe:build": "npm run -w front-end build",

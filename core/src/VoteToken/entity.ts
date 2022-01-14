@@ -1,17 +1,26 @@
-import { BaseEntity, IBaseEntity } from '/BaseEntity';
+import { BaseEntity, IBaseEntity } from '../BaseEntity';
 
 export interface IVoteToken extends IBaseEntity {
   voter: string;
-  voted: string;
-  cached: Record<string, unknown>;
+  voted?: string;
+  meta: Record<string, unknown>;
 }
 
-type RequiredAttrs = Pick<IVoteToken, 'voter' | 'voted'>;
+type RequiredAttrs = Pick<IVoteToken, 'voter'>;
 
 export class VoteToken extends BaseEntity<IVoteToken, RequiredAttrs> implements IVoteToken {
-    voter!: string;
+  voter!: string;
 
-    voted!: string;
+  voted?: string;
 
-    cached = {};
+  meta = {};
+
+  toObj(trueId?: boolean): IVoteToken {
+    return {
+      ...super.toObj(trueId),
+      voter: this.voter,
+      voted: this.voted,
+      meta: this.meta,
+    }
+  }
 }

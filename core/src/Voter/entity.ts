@@ -1,4 +1,4 @@
-import { BaseEntity, IBaseEntity } from '/BaseEntity';
+import { BaseEntity, IBaseEntity } from '../BaseEntity';
 
 export interface IVoter extends IBaseEntity {
   user?: string;
@@ -11,4 +11,12 @@ export class Voter extends BaseEntity<IVoter, RequiredAttrs> implements IVoter {
   user?: string;
 
   meta = {};
+
+  toObj(trueId?: boolean): IVoter {
+    return {
+      ...super.toObj(trueId),
+      user: this.user,
+      meta: this.meta,
+    }
+  }
 }

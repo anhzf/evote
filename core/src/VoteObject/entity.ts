@@ -1,4 +1,4 @@
-import { BaseEntity, IBaseEntity } from '/BaseEntity';
+import { BaseEntity, IBaseEntity } from '../BaseEntity';
 
 export interface IVoteObject extends IBaseEntity {
   title: string;
@@ -11,4 +11,12 @@ export class VoteObject extends BaseEntity<IVoteObject, RequiredAttrs> implement
   title!: string;
 
   thumbnailSrc?: string;
+
+  toObj(trueId?: boolean): IVoteObject {
+    return {
+      ...super.toObj(trueId),
+      title: this.title,
+      thumbnailSrc: this.thumbnailSrc,
+    }
+  }
 }

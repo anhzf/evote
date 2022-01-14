@@ -15,6 +15,9 @@
 		}
 	],
 	"settings": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": true
+    },
 		"conventionalCommits.scopes": [
 			"core"
 		]

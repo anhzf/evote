@@ -1,10 +1,9 @@
 {
-  "name": "core",
+  "name": "@evote/core",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "dev": "tsc -w",
     "build": "tsc",

@@ -1,20 +1,30 @@
-import { BaseEntity, IBaseEntity } from '/BaseEntity';
+import { BaseEntity, IBaseEntity } from '../BaseEntity';
 
 export interface IVotingEvent extends IBaseEntity {
-  name: string;
-  path?: string;
+  title: string;
+  url?: string;
   isArchived: boolean;
   isClosed: boolean;
 }
 
-type RequiredAttrs = Pick<IVotingEvent, 'name'>;
+type RequiredAttrs = Pick<IVotingEvent, 'title'>;
 
 export class VotingEvent extends BaseEntity<IVotingEvent, RequiredAttrs> implements IVotingEvent {
-  name!: string;
+  title!: string;
 
-  path?: string;
+  url?: string;
 
   isArchived = false;
 
   isClosed = true;
+
+  toObj(trueId?: boolean): IVotingEvent {
+    return {
+      ...super.toObj(trueId),
+      title: this.title,
+      url: this.url,
+      isArchived: this.isArchived,
+      isClosed: this.isClosed,
+    }
+  }
 }
