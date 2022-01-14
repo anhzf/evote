@@ -8,6 +8,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         component: () => import('pages/Index.vue'),
+        meta: { fullscreen: true },
       },
       {
         path: 'events',
@@ -24,11 +25,13 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'VotingEvent',
         component: () => import('pages/VotingEvent.vue'),
+        meta: { fullscreen: true },
       },
       {
         path: 'result',
         name: 'VotingEvent_Result',
         component: () => import('pages/VotingEventResult.vue'),
+        meta: { fullscreen: true },
       },
       {
         path: 'vote',

@@ -11,9 +11,9 @@ export class BaseEntity<
   T,
   ConstructorAttrs extends Partial<T & IBaseEntity> = T & IBaseEntity,
 > implements IBaseEntity {
-  #tempId = nanoid();
+  private _tempId = nanoid();
 
-  #id?: string;
+  private _id?: string;
 
   createdAt = new Date();
 
@@ -22,12 +22,12 @@ export class BaseEntity<
   deletedAt?: Date;
 
   get id() {
-    return this.#id || this.#tempId;
+    return this._id || this._tempId;
   }
 
   // when setting id, the updatedAt property does not get updated
   set id(v) {
-    this.#id = v;
+    this._id = v;
   }
 
   // deprecated due to unexpected behaviour
@@ -53,7 +53,7 @@ export class BaseEntity<
 
   toObj(trueId = false): IBaseEntity {
     return {
-      id: trueId ? this.id : (this.#id || ''),
+      id: trueId ? this.id : (this._id || ''),
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       deletedAt: this.deletedAt,

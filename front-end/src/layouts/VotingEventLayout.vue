@@ -19,7 +19,7 @@
 
     <q-drawer
       v-model="UIState.leftDrawerOpen"
-      :show-if-above="$route.path !== '/'"
+      :show-if-above="!route.meta.fullscreen"
       bordered
       class="column"
     >

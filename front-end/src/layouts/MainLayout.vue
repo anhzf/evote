@@ -19,7 +19,7 @@
 
     <q-drawer
       v-model="UIState.leftDrawerOpen"
-      :show-if-above="$route.path !== '/'"
+      :show-if-above="!$route.meta.fullscreen"
       bordered
       class="column"
     >
@@ -56,7 +56,7 @@ import { reactive, computed } from 'vue';
 import { Notify } from 'quasar';
 import { SidebarNavItem } from 'src/types/ui';
 
-const guestNavItems: SidebarNavItem[] = [
+const guestNavItems = Object.freeze<SidebarNavItem[]>([
   {
     label: 'Beranda',
     icon: 'home',
@@ -68,9 +68,9 @@ const guestNavItems: SidebarNavItem[] = [
     icon: 'ballot',
     to: { name: 'VotingEvents' },
   },
-];
+]);
 
-const userNavItems: SidebarNavItem[] = [
+const userNavItems = Object.freeze<SidebarNavItem[]>([
   {
     label: 'Keluar',
     icon: 'logout',
@@ -78,7 +78,7 @@ const userNavItems: SidebarNavItem[] = [
     class: 'text-red-6',
     onClick: () => Notify.create('Berhasil keluar!'),
   },
-];
+]);
 
 const navItems = computed(() => [
   ...guestNavItems,

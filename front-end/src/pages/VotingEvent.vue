@@ -32,19 +32,17 @@
       class="self-center max-w-screen-sm bg-grey-3"
     />
 
-    <!-- <div class="column "> -->
     <q-markdown
-      class="self-center full-width max-w-screen-sm"
       :src="desc"
+      no-html
+      class="self-center full-width max-w-screen-sm"
     />
-    <!-- </div> -->
   </q-page>
 </template>
 
 <script lang="ts" setup>
 import { inject } from 'vue';
 import { VotingEvent } from '@evote/core';
-import { QMarkdown } from '@quasar/quasar-ui-qmarkdown';
 
 const voting = inject<VotingEvent>('VotingEvent');
 const desc = `

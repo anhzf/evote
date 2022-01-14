@@ -3,7 +3,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@evote/core": ["@evote/core"]
+      // some dependency not included in the package.json, just for autocompletion
+      "@evote/core": ["@evote/core"],
+      "vue": ["vue"],
+      "vue-router": ["vue-router"],
     }
   }
 }
