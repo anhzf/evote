@@ -48,8 +48,9 @@ export const useAuthStore = createGlobalState(() => {
   watch(() => [
     requestedGuard.value,
     state.user !== null,
-  ] as const, ([guard, isAuthenticated]) => {
-    if (state.isReady) {
+    state.isReady,
+  ] as const, ([guard, isAuthenticated, isReady]) => {
+    if (isReady) {
       if (guard === 'auth' && !isAuthenticated) {
         void router.push(AUTH_FAILS_REDIRECT);
       }
@@ -66,6 +67,7 @@ export const useAuthStore = createGlobalState(() => {
     if (guard === 'auth' && !isReady) {
       Loading.show({ message: 'Authenticating...' });
     }
+
     if (state.isReady) {
       Loading.hide();
     }
