@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "core:dev": "npm run -w core dev",
     "core:build": "npm run -w core build",
     "fe:dev": "npm run -w front-end dev",
     "fe:build": "npm run -w front-end build",
+    "emulator:start": "firebase emulators:start --export-on-exit firebase-emulator",
+    "dev": "node dev.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,5 +20,10 @@
     "front-end",
     "functions",
     "core"
-  ]
+  ],
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "dotenv": "^12.0.3",
+    "typescript": "^4.5.4"
+  }
 }
