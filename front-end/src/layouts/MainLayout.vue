@@ -54,35 +54,70 @@
 <script lang="ts" setup>
 import { reactive, computed } from 'vue';
 import { Notify } from 'quasar';
+import { useUser } from 'src/use/useUser';
 import { SidebarNavItem } from 'src/types/ui';
+import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth } from 'src/firebase';
+import { useAuthStore } from 'src/store/useAuthStore';
 
-const guestNavItems = Object.freeze<SidebarNavItem[]>([
+const user = useUser();
+const { onAuthenticating } = useAuthStore();
+const auth = getAuth();
+
+const login = () => onAuthenticating(() => {
+  const provider = new GoogleAuthProvider();
+
+  return (signInWithPopup(auth, provider)
+    .then(() => Notify.create({
+      message: 'Berhasil masuk',
+      color: 'positive',
+    }))
+    .catch((err) => {
+      Notify.create({
+        message: String(err),
+        color: 'negative',
+      });
+    }) as Promise<void>);
+});
+const logout = () => onAuthenticating(() => signOut(auth));
+
+const defaultNavItems = Object.freeze<SidebarNavItem[]>([
   {
     label: 'Beranda',
     icon: 'home',
     to: '/',
     exact: true,
   },
+]);
+
+const userNavItems = Object.freeze<SidebarNavItem[]>([
   {
     label: 'Acara Voting Saya',
     icon: 'ballot',
     to: { name: 'VotingEvents' },
   },
-]);
-
-const userNavItems = Object.freeze<SidebarNavItem[]>([
   {
     label: 'Keluar',
     icon: 'logout',
     clickable: true,
     class: 'text-red-6',
-    onClick: () => Notify.create('Berhasil keluar!'),
+    onClick: logout,
+  },
+]);
+
+const guestNavItems = Object.freeze<SidebarNavItem[]>([
+  {
+    label: 'Masuk',
+    icon: 'login',
+    clickable: true,
+    class: 'text-green-6',
+    onClick: login,
   },
 ]);
 
 const navItems = computed(() => [
-  ...guestNavItems,
-  ...userNavItems,
+  ...defaultNavItems,
+  ...(user.value ? userNavItems : guestNavItems),
 ]);
 
 const UIState = reactive({

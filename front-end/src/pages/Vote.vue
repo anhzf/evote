@@ -9,7 +9,7 @@
       class="col-4"
     >
       <q-card
-        class="cursor-pointer"
+        class="vote-obj-card cursor-pointer"
         @click="openDialog(el)"
       >
         <q-img
@@ -27,10 +27,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, Ref } from 'vue';
+import {
+  ref, inject, Ref, watch,
+} from 'vue';
 import { VoteObject, VotingEvent } from '@evote/core';
 import { Dialog } from 'quasar';
 import DialogVoteObjectDetail from 'src/components/DialogVoteObjectDetail.vue';
+import { useUser } from 'src/use/useUser';
 
 const voting = inject<VotingEvent>('VotingEvent');
 const voteObjects = ref([
@@ -48,6 +51,8 @@ const voteObjects = ref([
   }),
 ]) as Ref<VoteObject[]>;
 
+const user = useUser('auth');
+
 const openDialog = (voteObject: VoteObject) => {
   Dialog.create({
     component: DialogVoteObjectDetail,
@@ -56,4 +61,14 @@ const openDialog = (voteObject: VoteObject) => {
     },
   });
 };
+
+watch(user, () => {
+  console.log(user.value);
+});
 </script>
+
+<style lang="sass">
+.vote-obj-card
+  &:hover
+    background-color: $blue-grey-1
+</style>

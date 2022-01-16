@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint func-names: 0 */
 /* eslint global-require: 0 */
+const { resolve } = require('path');
 const { configure } = require('quasar/wrappers');
 
 module.exports = configure((ctx) => ({
@@ -55,6 +56,8 @@ module.exports = configure((ctx) => ({
   build: {
     vueRouterMode: 'history', // available values: 'hash', 'history'
 
+    env: process.env,
+
     // transpile: false,
     // publicPath: '/',
 
@@ -74,8 +77,8 @@ module.exports = configure((ctx) => ({
 
     // https://quasar.dev/quasar-cli/handling-webpack
     // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
-    chainWebpack(/* chain */) {
-      //
+    chainWebpack(chain) {
+      chain.resolve.alias.set('~', resolve(__dirname, '../'));
     },
   },
 
@@ -108,7 +111,7 @@ module.exports = configure((ctx) => ({
 
     // Quasar plugins
     plugins: [
-      'Notify', 'Dialog',
+      'Notify', 'Dialog', 'Loading',
     ],
   },
 
