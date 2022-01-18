@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          {{ votingEvent.title }}
+          {{ votingEvent?.title || 'Evote' }}
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
@@ -42,11 +42,16 @@
             <q-item-label>{{ label }}</q-item-label>
           </q-item-section>
         </q-item>
+
+        <q-inner-loading :showing="isUserPrivilegeLoading" />
       </q-list>
 
       <q-space />
 
-      <div class="q-pa-lg">
+      <div
+        v-if="user"
+        class="q-pa-lg"
+      >
         <q-btn
           label="Lihat acara voting saya lainnya"
           icon="arrow_back"
@@ -59,17 +64,63 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <template v-if="!isVotingEventLoading">
+        <router-view v-if="votingEvent" />
+
+        <q-page
+          v-else
+          padding
+        >
+          <h4 class="q-mb-md">
+            404
+          </h4>
+          <span class="text-subtitle1">
+            Data voting tidak ditemukan
+          </span>
+          <q-btn
+            label="Kembali ke beranda"
+            to="/"
+            class="q-ma-md"
+          />
+        </q-page>
+      </template>
+
+      <q-inner-loading
+        :showing="isVotingEventLoading"
+        label="Memuat..."
+      />
     </q-page-container>
   </q-layout>
 </template>
 
 <script lang="ts" setup>
-import { reactive, computed, provide } from 'vue';
+import {
+  reactive, computed, provide, Ref,
+} from 'vue';
 import { useRoute } from 'vue-router';
-import { Notify } from 'quasar';
-import { VotingEvent } from '@evote/core';
+import { useAsyncState, whenever } from '@vueuse/core';
+import { useAuthModule } from 'src/modules/Auth';
+import { getVotingEventByUrl } from 'src/modules/VotingEvent';
+import { useUser } from 'src/use/useUser';
 import { SidebarNavItem } from 'src/types/ui';
+import { useUserPrivilege } from 'src/use/useUserPrivilege';
+import { VotingEvent } from '~/core/dist';
+
+const { login, logout } = useAuthModule();
+const user = useUser();
+const route = useRoute();
+
+const votingEventUrl = computed(() => String(route.params.votingEventName));
+
+const getVotingEvent = () => getVotingEventByUrl(votingEventUrl.value);
+
+const { state: votingEvent, isLoading: isVotingEventLoading, execute: validateVotingEvent } = useAsyncState(
+  getVotingEvent,
+  undefined,
+  { shallow: true },
+);
+
+const { userPrivilege, is, isLoading: isUserPrivilegeLoading } = useUserPrivilege(votingEvent as Ref<VotingEvent> || new VotingEvent());
 
 const defaultNavItems = Object.freeze<SidebarNavItem[]>([
   {
@@ -83,14 +134,14 @@ const defaultNavItems = Object.freeze<SidebarNavItem[]>([
     to: { name: 'VotingEvent' },
     exact: true,
   },
+]);
+
+const adminNavItems = Object.freeze<SidebarNavItem[]>([
   {
     label: 'Hasil pemilihan',
     icon: 'poll',
     to: { name: 'VotingEvent_Result' },
   },
-]);
-
-const adminNavItems = Object.freeze<SidebarNavItem[]>([
   {
     label: 'Daftar Pemilih',
     icon: 'people',
@@ -109,21 +160,25 @@ const userNavItems = Object.freeze<SidebarNavItem[]>([
     icon: 'logout',
     clickable: true,
     class: 'text-red-6',
-    onClick: () => Notify.create('Berhasil keluar!'),
+    onClick: logout,
+  },
+]);
+
+const guestNavItems = Object.freeze<SidebarNavItem[]>([
+  {
+    label: 'Masuk',
+    icon: 'login',
+    clickable: true,
+    class: 'text-green-6',
+    onClick: login,
   },
 ]);
 
 const navItems = computed(() => [
   ...defaultNavItems,
-  ...adminNavItems,
-  ...userNavItems,
+  ...((is('OWNER') || is('ADMIN')) ? adminNavItems : []),
+  ...(user.value ? userNavItems : guestNavItems),
 ]);
-
-const route = useRoute();
-const votingEvent = computed(() => new VotingEvent().fill({
-  title: 'Pemilihan Presiden OSIS SMPN 23 Surakarta',
-  url: String(route.params.votingEventName),
-}));
 
 const UIState = reactive({
   leftDrawerOpen: false,
@@ -132,6 +187,8 @@ const UIState = reactive({
 const toggleLeftDrawer = () => {
   UIState.leftDrawerOpen = !UIState.leftDrawerOpen;
 };
+
+whenever(votingEventUrl, () => validateVotingEvent());
 
 provide('VotingEvent', votingEvent);
 </script>

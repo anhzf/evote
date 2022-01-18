@@ -6,7 +6,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "dev": "tsc -w",
+    "dev:cjs": "tsc -w -p tsconfig.cjs.json",
     "build": "tsc",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

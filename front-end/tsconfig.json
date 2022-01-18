@@ -4,9 +4,6 @@
     "baseUrl": ".",
     "paths": {
       // some dependency not included in the package.json, just for autocompletion
-      "vue": ["vue"],
-      "vue-router": ["vue-router"],
-      "@evote/core": ["@evote/core"],
       "~/*": ["../*"]
     }
   }

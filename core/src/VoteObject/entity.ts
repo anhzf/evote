@@ -15,7 +15,7 @@ export class VoteObject extends BaseEntity<IVoteObject, RequiredAttrs> implement
 
   thumbnailSrc?: string;
 
-  toObj(trueId?: boolean): IVoteObject {
+  toObj(trueId = false): IVoteObject {
     return {
       ...super.toObj(trueId),
       title: this.title,

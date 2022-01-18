@@ -5,6 +5,7 @@ export interface IVotingEvent extends IBaseEntity {
   url?: string;
   isArchived: boolean;
   isClosed: boolean;
+  isResultsPublished: boolean;
 }
 
 type RequiredAttrs = Pick<IVotingEvent, 'title'>;
@@ -18,13 +19,16 @@ export class VotingEvent extends BaseEntity<IVotingEvent, RequiredAttrs> impleme
 
   isClosed = true;
 
-  toObj(trueId?: boolean): IVotingEvent {
+  isResultsPublished = false;
+
+  toObj(trueId = false): IVotingEvent {
     return {
       ...super.toObj(trueId),
       title: this.title,
       url: this.url,
       isArchived: this.isArchived,
       isClosed: this.isClosed,
+      isResultsPublished: this.isResultsPublished,
     }
   }
 }

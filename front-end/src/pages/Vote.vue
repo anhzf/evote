@@ -27,15 +27,13 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  ref, inject, Ref, watch,
-} from 'vue';
-import { VoteObject, VotingEvent } from '@evote/core';
+import { ref, inject, Ref } from 'vue';
 import { Dialog } from 'quasar';
+import { VoteObject, VotingEvent } from '@evote/core';
 import DialogVoteObjectDetail from 'src/components/DialogVoteObjectDetail.vue';
-import { useUser } from 'src/use/useUser';
 
-const voting = inject<VotingEvent>('VotingEvent');
+const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
+
 const voteObjects = ref([
   new VoteObject().fill({
     title: 'Shoffan Mujahid',
@@ -51,20 +49,12 @@ const voteObjects = ref([
   }),
 ]) as Ref<VoteObject[]>;
 
-const user = useUser('auth');
-
 const openDialog = (voteObject: VoteObject) => {
   Dialog.create({
     component: DialogVoteObjectDetail,
-    componentProps: {
-      data: voteObject,
-    },
+    componentProps: { data: voteObject },
   });
 };
-
-watch(user, () => {
-  console.log(user.value);
-});
 </script>
 
 <style lang="sass">

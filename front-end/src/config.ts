@@ -9,7 +9,7 @@ export default {
     emulatorPort: {
       firestore: firebaseJson.emulators.firestore.port,
       auth: firebaseJson.emulators.auth.port,
-      functions: firebaseJson.emulators.storage.port,
+      functions: firebaseJson.emulators.functions.port,
       storage: firebaseJson.emulators.storage.port,
     },
   },

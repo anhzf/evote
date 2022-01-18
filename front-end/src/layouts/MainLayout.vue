@@ -53,33 +53,12 @@
 
 <script lang="ts" setup>
 import { reactive, computed } from 'vue';
-import { Notify } from 'quasar';
 import { useUser } from 'src/use/useUser';
 import { SidebarNavItem } from 'src/types/ui';
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { getAuth } from 'src/firebase';
-import { useAuthStore } from 'src/store/useAuthStore';
+import { useAuthModule } from 'src/modules/Auth';
 
 const user = useUser();
-const { onAuthenticating } = useAuthStore();
-const auth = getAuth();
-
-const login = () => onAuthenticating(() => {
-  const provider = new GoogleAuthProvider();
-
-  return (signInWithPopup(auth, provider)
-    .then(() => Notify.create({
-      message: 'Berhasil masuk',
-      color: 'positive',
-    }))
-    .catch((err) => {
-      Notify.create({
-        message: String(err),
-        color: 'negative',
-      });
-    }) as Promise<void>);
-});
-const logout = () => onAuthenticating(() => signOut(auth));
+const { login, logout } = useAuthModule();
 
 const defaultNavItems = Object.freeze<SidebarNavItem[]>([
   {

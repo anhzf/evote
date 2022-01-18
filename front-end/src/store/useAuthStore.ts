@@ -39,7 +39,7 @@ export const useAuthStore = createGlobalState(() => {
       }
     };
   };
-  const onAuthenticating = async (fn: (...args: unknown[]) => Promise<void>) => {
+  const onAuthenticating = async (fn: CallableFunction) => {
     state.isReady = false;
     await fn();
     state.isReady = true;

@@ -12,7 +12,7 @@ export class Voter extends BaseEntity<IVoter, RequiredAttrs> implements IVoter {
 
   meta = {};
 
-  toObj(trueId?: boolean): IVoter {
+  toObj(trueId = false): IVoter {
     return {
       ...super.toObj(trueId),
       user: this.user,

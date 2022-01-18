@@ -1,11 +1,8 @@
-import {
-  Ref, onUnmounted, readonly, DeepReadonly,
-} from 'vue';
+import { onUnmounted, readonly } from 'vue';
 import { GuardType } from 'src/constant';
 import { useAuthStore } from 'src/store/useAuthStore';
-import { User } from 'firebase/auth';
 
-export const useUser = (guardType: GuardType = 'default'): DeepReadonly<Ref<(typeof guardType extends 'auth' ? User : (User | null))>> => {
+export const useUser = (guardType: GuardType = 'default') => {
   const { user, requestGuard } = useAuthStore();
   const removeGuardRequest = requestGuard(guardType);
 

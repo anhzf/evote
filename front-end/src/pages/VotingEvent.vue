@@ -5,7 +5,7 @@
   >
     <div class="row justify-between no-wrap q-gutter-x-md">
       <h1 class="text-h2 q-my-auto">
-        {{ voting?.title }}
+        {{ voting.title }}
       </h1>
 
       <div class="col-shrink-0 column justify-start items-end q-gutter-y-md">
@@ -13,15 +13,17 @@
           label="Berikan suara"
           icon="how_to_vote"
           color="primary"
-          :to="{ name: 'VotingEvent_Vote', params: { id: voting?.id } }"
+          :disable="voting.isClosed"
+          @click="onClickVoteNow"
         />
 
         <q-btn
+          v-if="voting.isResultsPublished"
           label="Lihat perolehan"
           icon="poll"
           outline
           color="primary"
-          :to="{ name: 'VotingEvent_Result', params: { id: voting?.id } }"
+          :to="{ name: 'VotingEvent_Result', params: { id: voting.id } }"
         />
       </div>
     </div>
@@ -41,14 +43,29 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue';
+import { inject, Ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { Dialog } from 'quasar';
 import { VotingEvent } from '@evote/core';
+import DialogEnterVote from 'src/components/DialogEnterVote.vue';
+import { useUser } from 'src/use/useUser';
 
-const voting = inject<VotingEvent>('VotingEvent');
+const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
+const router = useRouter();
+const user = useUser();
+
 const desc = `
 :::
 **Pemilihan Presiden OSIS**
 Pemilu OSIS yang diadakan oleh SMPN 23 ini...
 :::
 `;
+
+const onClickVoteNow = () => {
+  if (user.value) {
+    void router.push({ name: 'VotingEvent_Vote', params: { id: voting.value.id } });
+  } else {
+    Dialog.create({ component: DialogEnterVote });
+  }
+};
 </script>

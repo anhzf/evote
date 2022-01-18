@@ -1,12 +1,14 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth as fbGetAuth, connectAuthEmulator, Auth } from 'firebase/auth';
 import { initializeFirestore, connectFirestoreEmulator, Firestore } from 'firebase/firestore';
+import { getFunctions, Functions, connectFunctionsEmulator } from 'firebase/functions';
 import config from 'src/config';
 
 const firebaseApp = initializeApp(config.firebase.config);
 
 let auth: Auth;
 let db: Firestore;
+let fns: Functions;
 
 const getDb = () => {
   if (!db) {
@@ -34,8 +36,21 @@ const getAuth = () => {
   return auth;
 };
 
+const getFns = () => {
+  if (!fns) {
+    fns = getFunctions(firebaseApp);
+
+    if (config.firebase.useEmulator) {
+      connectFunctionsEmulator(fns, config.firebase.emulatorHost, config.firebase.emulatorPort.functions);
+    }
+  }
+
+  return fns;
+};
+
 export {
   firebaseApp as default,
   getDb,
   getAuth,
+  getFns,
 };

@@ -15,7 +15,7 @@ export class VoteToken extends BaseEntity<IVoteToken, RequiredAttrs> implements 
 
   meta = {};
 
-  toObj(trueId?: boolean): IVoteToken {
+  toObj(trueId = false): IVoteToken {
     return {
       ...super.toObj(trueId),
       voter: this.voter,
