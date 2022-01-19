@@ -1,14 +1,11 @@
-import {
-  createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut,
-} from 'firebase/auth';
 import { Notify } from 'quasar';
-import { getAuth } from 'src/firebase';
+import {
+  GoogleAuthProvider, signInWithCustomToken, signInWithPopup, signOut,
+} from 'firebase/auth';
+import { httpsCallable } from 'firebase/functions';
+import { getAuth, getFns } from 'src/firebase';
 import { useAuthStore } from 'src/store/useAuthStore';
-
-const AUTH_CRED = {
-  email: 'dev@example.test',
-  pass: '123456',
-};
+import { promiseHandler } from 'src/utils/ui';
 
 export const useAuthModule = () => {
   const auth = getAuth();
@@ -17,25 +14,34 @@ export const useAuthModule = () => {
   const login = () => onAuthenticating(() => {
     const provider = new GoogleAuthProvider();
 
-    return signInWithPopup(auth, provider)
-      .then(() => Notify.create({
-        message: 'Berhasil masuk',
-        color: 'positive',
-      }))
-      .catch((err) => {
-        Notify.create({
-          message: String(err),
-          color: 'negative',
-        });
-      }) as Promise<void>;
+    return promiseHandler(
+      signInWithPopup(auth, provider)
+        .then(() => Notify.create({
+          message: 'Berhasil masuk',
+          color: 'positive',
+        })),
+    );
   });
 
-  const signUp = () => createUserWithEmailAndPassword(auth, AUTH_CRED.email, AUTH_CRED.pass);
+  const loginWithVoteToken = (votingEventId: string, voteToken: string) => onAuthenticating(async () => {
+    const fns = getFns();
+    const getCustomToken = httpsCallable<{votingEventId: string; voteToken: string;}, string>(fns, 'loginWithVoteToken');
+    const { data: customToken } = await getCustomToken({ votingEventId, voteToken });
+
+    return promiseHandler(
+      signInWithCustomToken(auth, customToken)
+        .then(() => Notify.create({
+          message: 'Berhasil masuk',
+          color: 'positive',
+        })),
+    );
+  });
+
   const logout = () => onAuthenticating(() => signOut(auth));
 
   return {
     login,
+    loginWithVoteToken,
     logout,
-    signUp,
   };
 };

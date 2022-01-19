@@ -1,5 +1,6 @@
 export const collectionName = {
   VotingEvent: 'VotingEvent',
+  VoteObject: 'VoteObject',
   Role: 'Role',
   UserData: 'UserData',
   UserPrivilege: 'UserPrivilege',

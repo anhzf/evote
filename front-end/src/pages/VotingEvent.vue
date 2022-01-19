@@ -49,10 +49,13 @@ import { Dialog } from 'quasar';
 import { VotingEvent } from '@evote/core';
 import DialogEnterVote from 'src/components/DialogEnterVote.vue';
 import { useUser } from 'src/use/useUser';
+import { useAuthModule } from 'src/modules/Auth';
+import { promiseHandler } from 'src/utils/ui';
 
 const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
 const router = useRouter();
 const user = useUser();
+const { loginWithVoteToken } = useAuthModule();
 
 const desc = `
 :::
@@ -61,11 +64,17 @@ Pemilu OSIS yang diadakan oleh SMPN 23 ini...
 :::
 `;
 
+const gotoVotePage = () => promiseHandler(router.push({ name: 'VotingEvent_Vote', params: { id: voting.value.id } }));
+
 const onClickVoteNow = () => {
   if (user.value) {
-    void router.push({ name: 'VotingEvent_Vote', params: { id: voting.value.id } });
+    void gotoVotePage();
   } else {
-    Dialog.create({ component: DialogEnterVote });
+    Dialog.create({ component: DialogEnterVote })
+      .onOk((token: string) => {
+        void promiseHandler(loginWithVoteToken(voting.value.id, token));
+        void gotoVotePage();
+      });
   }
 };
 </script>

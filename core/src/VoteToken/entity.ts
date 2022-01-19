@@ -2,7 +2,7 @@ import { BaseEntity, IBaseEntity } from '../BaseEntity';
 
 export interface IVoteToken extends IBaseEntity {
   voter: string;
-  voted: string | null;
+  voted?: string;
   meta: Record<string, unknown>;
 }
 
@@ -11,7 +11,7 @@ type RequiredAttrs = Pick<IVoteToken, 'voter'>;
 export class VoteToken extends BaseEntity<IVoteToken, RequiredAttrs> implements IVoteToken {
   voter!: string;
 
-  voted = null;
+  voted?: string;
 
   meta = {};
 

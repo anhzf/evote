@@ -2,7 +2,7 @@ import {
   collection, CollectionReference, doc, getDoc, query, QueryDocumentSnapshot, startAt, writeBatch, orderBy, where, limit, getDocs, QuerySnapshot,
 } from 'firebase/firestore';
 import { Voter } from '@evote/core';
-import { getDb } from 'src/firebase';
+import { getAuth, getDb } from 'src/firebase';
 import { BaseEntityConverter } from 'src/modules/BaseEntity';
 import { collectionName as c, votingEventInfoKey } from '~/shared/firestoreReferences';
 import { arrayChunks } from '~/shared/utils/array';
@@ -63,3 +63,12 @@ export const fetchVoterList = async (votingEventId: string, start = 0, offset = 
 
   return [];
 };
+
+// export const getUserVoterAccount =async (votingEventId:string) => {
+//   const auth = getAuth();
+//   const db = getDb();
+
+//   const voterCollectionRef = collection(db, `${c.VotingEvent}/${votingEventId}/${c.Voter}`);
+//   const q = query(voterCollectionRef,
+//     where('userId', '==', auth.currentUser?.email),
+// }
