@@ -6,7 +6,7 @@
     <div
       v-for="el in voteObjects"
       :key="el.id"
-      class="col-4"
+      class="col-xs-12 col-sm-4"
     >
       <q-card
         class="vote-obj-card cursor-pointer"

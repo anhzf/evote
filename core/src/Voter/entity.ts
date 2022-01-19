@@ -2,7 +2,7 @@ import { BaseEntity, IBaseEntity } from '../BaseEntity';
 
 export interface IVoter extends IBaseEntity {
   user?: string;
-  meta: Record<string, unknown>;
+  meta: Record<string, any>;
 }
 
 type RequiredAttrs = Partial<IVoter>;

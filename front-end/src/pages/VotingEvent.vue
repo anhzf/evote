@@ -8,7 +8,7 @@
         {{ voting.title }}
       </h1>
 
-      <div class="col-shrink-0 column justify-start items-end q-gutter-y-md">
+      <div class="flex-shrink-0 column justify-start items-end q-gutter-y-md">
         <q-btn
           label="Berikan suara"
           icon="how_to_vote"

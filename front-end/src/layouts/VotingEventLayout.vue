@@ -99,12 +99,12 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAsyncState, whenever } from '@vueuse/core';
+import { VotingEvent } from '@evote/core';
 import { useAuthModule } from 'src/modules/Auth';
 import { getVotingEventByUrl } from 'src/modules/VotingEvent';
 import { useUser } from 'src/use/useUser';
 import { SidebarNavItem } from 'src/types/ui';
 import { useUserPrivilege } from 'src/use/useUserPrivilege';
-import { VotingEvent } from '~/core/dist';
 
 const { login, logout } = useAuthModule();
 const user = useUser();
@@ -120,7 +120,7 @@ const { state: votingEvent, isLoading: isVotingEventLoading, execute: validateVo
   { shallow: true },
 );
 
-const { userPrivilege, is, isLoading: isUserPrivilegeLoading } = useUserPrivilege(votingEvent as Ref<VotingEvent> || new VotingEvent());
+const { is, isLoading: isUserPrivilegeLoading } = useUserPrivilege(votingEvent as Ref<VotingEvent> || new VotingEvent());
 
 const defaultNavItems = Object.freeze<SidebarNavItem[]>([
   {
