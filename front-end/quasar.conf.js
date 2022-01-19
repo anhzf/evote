@@ -79,6 +79,16 @@ module.exports = configure((ctx) => ({
     // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
     chainWebpack(chain) {
       chain.resolve.alias.set('~', resolve(__dirname, '../'));
+
+      chain.plugin('node-polyfill')
+        .use(require('node-polyfill-webpack-plugin'));
+    },
+    extendWebpack(cfg) {
+      // cfg.resolve.fallback = {
+      //   ...cfg.resolve.fallback,
+      //   buffer: require.resolve('buffer'),
+      //   stream: require.resolve('stream-browserify'),
+      // };
     },
   },
 

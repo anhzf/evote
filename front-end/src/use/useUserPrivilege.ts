@@ -1,9 +1,9 @@
 import { computed, isRef, watch } from 'vue';
 import { Notify } from 'quasar';
 import { MaybeRef, useAsyncState, whenever } from '@vueuse/core';
+import { Role, UserPrivilege, VotingEvent } from '@evote/core';
 import { getUserPrivilege } from 'src/modules/UserPrivilege';
 import { useUser } from 'src/use/useUser';
-import { Role, UserPrivilege, VotingEvent } from '~/core/dist';
 
 export const useUserPrivilege = (voting: MaybeRef<VotingEvent>, guardTruthyFactory = (() => true), guardFallback?: CallableFunction) => {
   const user = useUser();

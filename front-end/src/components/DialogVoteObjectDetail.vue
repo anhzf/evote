@@ -25,7 +25,7 @@
           :src="`https://i.pravatar.cc/200?u=${data.title}`"
           width="100%"
           height="60vh"
-          class="col-shrink-0 self-center max-w-screen-xs"
+          class="flex-shrink-0 self-center max-w-screen-xs"
         />
 
         <q-markdown

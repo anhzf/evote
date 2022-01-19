@@ -1,5 +1,5 @@
 import { QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
-import { IBaseEntity } from '~/core/dist';
+import { IBaseEntity } from '@evote/core';
 
 export const BaseEntityConverter = {
   fillEntity: <T extends IBaseEntity>(snapshot: QueryDocumentSnapshot<T>): T => {

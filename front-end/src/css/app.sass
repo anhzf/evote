@@ -1,32 +1,51 @@
 // app global css in Sass form
+.w
+  &-screen-xs
+    width: $breakpoint-xs !important
+  &-screen-sm
+    width: $breakpoint-sm !important
+  &-screen-md
+    width: $breakpoint-md !important
+  &-screen-lg
+    width: $breakpoint-lg !important
+  &-full
+    width: 100% !important
+
 .max-w
   &-screen-xs
-    max-width: $breakpoint-xs
+    max-width: $breakpoint-xs !important
   &-screen-sm
-    max-width: $breakpoint-sm
+    max-width: $breakpoint-sm !important
   &-screen-md
-    max-width: $breakpoint-md
+    max-width: $breakpoint-md !important
   &-screen-lg
-    max-width: $breakpoint-lg
+    max-width: $breakpoint-lg !important
   &-full
-    max-width: 100%
+    max-width: 100% !important
 
 .h
   &-min
-    height: min-content
+    height: min-content !important
 
 .max-h
   &-full
-    max-height: 100%
+    max-height: 100% !important
 
-.col-grow
-  &-0
-    flex-grow: 0
+.flex-grow
+  flex-grow: 1 !important
 
-.col-shrink
   &-0
-    flex-shrink: 0
+    flex-grow: 0 !important
+
+.flex-shrink
+  flex-shrink: 1 !important
+
+  &-0
+    flex-shrink: 0 !important
 
 .firebase-emulator-warning
   pointer-events: none
   opacity: .4
+
+.select-all
+  user-select: all !important

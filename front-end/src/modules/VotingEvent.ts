@@ -4,7 +4,7 @@ import {
 import { httpsCallable } from 'firebase/functions';
 import { getDb, getFns } from 'src/firebase';
 import { BaseEntityConverter } from 'src/modules/BaseEntity';
-import { IVotingEvent, VotingEvent } from '~/core/dist';
+import { IVotingEvent, VotingEvent } from '@evote/core';
 import { collectionName } from '~/shared/firestoreReferences';
 
 export const VotingEventConverter = {
