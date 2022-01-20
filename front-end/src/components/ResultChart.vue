@@ -9,23 +9,26 @@
 
 <script lang="ts" setup>
 import {
-  inject, onMounted, computed, defineProps, ref, Ref, watch,
+  onMounted, computed, defineProps, ref, Ref, watch,
 } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { VoteObject, VotingEvent } from '@evote/core';
 
 interface Props {
   data: {
-    voteObject: VoteObject,
-    count: number;
-  }[];
+    voteObjects: {
+      voteObject: VoteObject;
+      count: number;
+    }[],
+    used: number;
+    total: number;
+  };
 }
 
 const props = defineProps<Props>();
-// const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
 
-const xValues = computed(() => props.data.map(({ voteObject }) => voteObject.title));
-const yValues = computed(() => props.data.map((el) => el.count));
+const xValues = computed(() => props.data.voteObjects.map((el) => el.voteObject.title));
+const yValues = computed(() => props.data.voteObjects.map((el) => el.count));
 const barColors = [
   '#2b5797',
   '#e8c3b9',

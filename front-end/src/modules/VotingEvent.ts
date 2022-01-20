@@ -44,6 +44,8 @@ export const getVotingEventImage = (votingEventId: string) => {
 };
 
 interface IVotingEventSummary {
+  used: number;
+  total: number;
   // k is VoteObject.id
   [k: string]: number;
 }
@@ -54,7 +56,7 @@ export const getVotingEventSummary = async (votingEventId: string) => {
   const getDocsByPath = httpsCallable<{paths: string[]}, DocumentData[]>(fns, 'getDocumentsByFullPath');
   const summaryRef = doc(db, `${cn.VotingEvent}/${votingEventId}/Info/${votingEventInfoKey.summary}`);
   const summarySnapshot = await getDoc(summaryRef) as QueryDocumentSnapshot<IVotingEventSummary>;
-  const summary = summarySnapshot.data();
+  const { used, total, ...summary } = summarySnapshot.data();
   const ids = Object.keys(summary);
   const paths = ids.map((k) => `${cn.VotingEvent}/${votingEventId}/${cn.VoteObject}/${k}`);
   const { data } = await getDocsByPath({ paths });
@@ -70,5 +72,9 @@ export const getVotingEventSummary = async (votingEventId: string) => {
     };
   });
 
-  return voteObjects;
+  return {
+    used,
+    total,
+    voteObjects,
+  };
 };

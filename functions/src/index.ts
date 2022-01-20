@@ -22,7 +22,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
 
   await docRef.set({
     createdAt: new Date(),
-  });
+  }, {merge: true});
 });
 
 export const onUserDelete = functions.auth.user().onDelete(async (user) => {
@@ -39,12 +39,12 @@ export const onVotingEventWriteVoter = functions.firestore
 
       if (!change.before.exists) {
         // New document Created : add one to count
-        votingEventInfoVoterCacheDocRef.set({count: FieldValue.increment(1)});
+        votingEventInfoVoterCacheDocRef.update({count: FieldValue.increment(1)});
       } else if (change.before.exists && change.after.exists) {
         // Updating existing document : Do nothing
       } else if (!change.after.exists) {
         // Deleting document : subtract one from count
-        votingEventInfoVoterCacheDocRef.set({count: FieldValue.increment(-1)});
+        votingEventInfoVoterCacheDocRef.update({count: FieldValue.increment(-1)});
       }
     });
 
@@ -61,13 +61,13 @@ export const onVoteTokenChange = functions.firestore
         const voted = data.voted as (FirebaseFirestore.DocumentReference<IVoteObject> | undefined);
 
         if (voted) {
-          votingEventInfoSummaryDocRef.set({[voted.id]: FieldValue.increment(1)});
+          votingEventInfoSummaryDocRef.set({[voted.id]: FieldValue.increment(1)}, {merge: true});
         } else {
           const oldData = change.before.data() as IVoteToken;
           const oldVoted = oldData.voted as (FirebaseFirestore.DocumentReference<IVoteObject> | undefined);
 
           if (oldVoted) {
-            votingEventInfoSummaryDocRef.set({[oldVoted.id]: FieldValue.increment(-1)});
+            votingEventInfoSummaryDocRef.set({[oldVoted.id]: FieldValue.increment(-1)}, {merge: true});
           }
         }
       } else if (!change.after.exists) {
@@ -76,7 +76,7 @@ export const onVoteTokenChange = functions.firestore
         const voted = data.voted as (FirebaseFirestore.DocumentReference<IVoteObject> | undefined);
 
         if (voted) {
-          votingEventInfoSummaryDocRef.set({[voted.id]: FieldValue.increment(-1)});
+          votingEventInfoSummaryDocRef.set({[voted.id]: FieldValue.increment(-1)}, {merge: true});
         }
       }
     });
@@ -144,7 +144,7 @@ export const getVoteToken = functions.https.onCall(async (data, context) => {
   const voteToken = new VoteToken().fill({id: newDocRef.id, voter: voterId});
   const {id, ...tokenData} = voteToken.toObj();
 
-  await newDocRef.set({...tokenData, voter: voterRef});
+  await newDocRef.set({...tokenData, voter: voterRef}, {merge: true});
 
   return voteToken.toObj();
 });
@@ -198,4 +198,84 @@ export const vote = functions.https.onCall(async (data, context) => {
   }
 
   throw new functions.https.HttpsError("unauthenticated", "Invalid vote token");
+});
+
+interface validateVoteResultData {
+  votingEventId: string;
+}
+
+export const getVoteResult = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError("unauthenticated", "User is not authenticated");
+  }
+
+  const {votingEventId} = data as validateVoteResultData;
+
+  if (!votingEventId) {
+    throw new functions.https.HttpsError("invalid-argument", "votingEventId is required");
+  }
+
+  const db = getDb();
+  const collectionRef = db.collection(`${cn.VotingEvent}/${votingEventId}/${cn.VoteToken}`);
+  const snapshots = await collectionRef.get() as FirebaseFirestore.QuerySnapshot<IVoteToken>;
+  const voteTokens = snapshots.docs.map((doc) => new VoteToken().fill({...doc.data(), id: doc.id}).toObj());
+  const countPerVoteObject = voteTokens.reduce((acc, cur) => {
+    const voteObject = cur.voted as FirebaseFirestore.DocumentReference | undefined;
+
+    if (voteObject) {
+      acc[voteObject.id] = (acc[voteObject.id] || 0) + 1;
+    }
+
+    return acc;
+  }, {} as {[key: string]: number});
+  const usedVoteToken = voteTokens.filter((cur) => cur.voted).length;
+
+  return {
+    counts: countPerVoteObject,
+    totalUsed: usedVoteToken,
+    total: voteTokens.length,
+  };
+});
+interface validateVoteResultData {
+  votingEventId: string;
+}
+
+export const validateVoteResult = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError("unauthenticated", "User is not authenticated");
+  }
+
+  const {votingEventId} = data as validateVoteResultData;
+
+  if (!votingEventId) {
+    throw new functions.https.HttpsError("invalid-argument", "votingEventId is required");
+  }
+
+  const db = getDb();
+
+  return db.runTransaction(async (transaction) => {
+    const collectionRef = db.collection(`${cn.VotingEvent}/${votingEventId}/${cn.VoteToken}`);
+    const snapshots = await transaction.get(collectionRef) as FirebaseFirestore.QuerySnapshot<IVoteToken>;
+    const voteTokens = snapshots.docs.map((doc) => new VoteToken().fill({...doc.data(), id: doc.id}).toObj());
+    const countPerVoteObject = voteTokens.reduce((acc, cur) => {
+      const voteObject = cur.voted as FirebaseFirestore.DocumentReference | undefined;
+
+      if (voteObject) {
+        acc[voteObject.id] = (acc[voteObject.id] || 0) + 1;
+      }
+
+      return acc;
+    }, {} as {[key: string]: number});
+    const usedVoteToken = voteTokens.filter((cur) => cur.voted).length;
+
+    const votingEventInfoSummaryDocRef = db
+        .doc(`${cn.VotingEvent}/${votingEventId}/Info/${votingEventInfoKey.summary}`);
+
+
+    transaction.update(votingEventInfoSummaryDocRef, {
+      used: usedVoteToken,
+      total: voteTokens.length,
+      ...countPerVoteObject,
+    });
+  });
 });

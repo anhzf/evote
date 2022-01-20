@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "anh-election-app"
+  },
+  "targets": {
+    "anh-election-app": {
+      "hosting": {
+        "primary": [
+          "anhzf-election"
+        ],
+        "alt": [
+          "anh-election-app"
+        ]
+      }
+    }
   }
 }

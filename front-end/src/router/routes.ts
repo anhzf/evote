@@ -31,7 +31,6 @@ const routes: RouteRecordRaw[] = [
         path: 'result',
         name: 'VotingEvent_Result',
         component: () => import('pages/VotingEventResult.vue'),
-        meta: { fullscreen: true },
       },
       {
         path: 'vote',
