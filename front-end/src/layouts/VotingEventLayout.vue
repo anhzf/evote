@@ -97,7 +97,7 @@
 import {
   reactive, computed, provide, Ref,
 } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAsyncState, whenever } from '@vueuse/core';
 import { VotingEvent } from '@evote/core';
 import { useAuthModule } from 'src/modules/Auth';
@@ -109,6 +109,7 @@ import { useUserPrivilege } from 'src/use/useUserPrivilege';
 const { login, logout } = useAuthModule();
 const user = useUser();
 const route = useRoute();
+const router = useRouter();
 
 const votingEventUrl = computed(() => String(route.params.votingEventName));
 
@@ -160,7 +161,8 @@ const userNavItems = Object.freeze<SidebarNavItem[]>([
     icon: 'logout',
     clickable: true,
     class: 'text-red-6',
-    onClick: logout,
+    onClick: () => logout()
+      .then(() => router.push({ name: 'VotingEvent' })),
   },
 ]);
 
