@@ -1,18 +1,18 @@
 <template>
-  <div>
-    <canvas
-      id="myChart"
-      style="width:auto; max-width:700px; max-height: 400px;"
-    />
-  </div>
+  <canvas
+    ref="resultChart"
+    class="fit max-w-screen-xs"
+    style="max-height: 70vh;"
+  />
 </template>
 
 <script lang="ts" setup>
 import {
-  onMounted, computed, defineProps, ref, Ref, watch,
+  computed, defineProps, ref, watch, getCurrentInstance,
 } from 'vue';
 import { Chart, registerables } from 'chart.js';
-import { VoteObject, VotingEvent } from '@evote/core';
+import randomColor from 'randomcolor';
+import { VoteObject } from '@evote/core';
 
 interface Props {
   data: {
@@ -26,44 +26,35 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const instance = getCurrentInstance();
 
+const resultChart = ref<HTMLCanvasElement>();
 const xValues = computed(() => props.data.voteObjects.map((el) => el.voteObject.title));
 const yValues = computed(() => props.data.voteObjects.map((el) => el.count));
-// const data = [10];
-// const yValues = computed(() => data);
-const barColors = [
-  '#2b5797',
-  '#e8c3b9',
-];
-// const chart = ref<Chart<'pie', number[], string>>();
 
-// console.log(yValues.value);
+const chart = ref<Chart<'pie', number[], string>>();
 
-onMounted(() => {
-  Chart.register(...registerables);
+watch([resultChart, xValues, yValues], () => {
+  if (instance?.isMounted) {
+    /* TODO: use chart.update() instead of re-render chart */
+    if (resultChart.value) {
+      Chart.register(...registerables);
 
-  // eslint-disable-next-line no-new
-  new Chart('myChart', {
-    type: 'pie',
-    data: {
-      labels: xValues.value,
-      datasets: [{
-        backgroundColor: barColors,
-        data: yValues.value,
-      }],
-    },
-    options: {},
-  });
-});
-
-// const updateDatasets = () => {
-//   if (chart.value) {
-//     chart.value.data.datasets[0].data = yValues.value;
-//     chart.value.update();
-//   }
-// };
-
-// watch([xValues, yValues], () => {
-//   updateDatasets();
-// });
+      chart.value?.destroy();
+      chart.value = new Chart(resultChart.value, {
+        type: 'pie',
+        data: {
+          labels: xValues.value,
+          datasets: [{
+            backgroundColor: props.data.voteObjects.map(() => randomColor()),
+            data: yValues.value,
+          }],
+        },
+        options: {
+          responsive: true,
+        },
+      });
+    }
+  }
+}, { immediate: true });
 </script>

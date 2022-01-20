@@ -78,3 +78,5 @@ export const getVotingEventSummary = async (votingEventId: string) => {
     voteObjects,
   };
 };
+
+export const validateVotingEventResult = httpsCallable<{ votingEventId: string }, void>(getFns(), 'validateVoteResult');

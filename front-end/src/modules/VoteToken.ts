@@ -1,10 +1,13 @@
 import {
   doc,
+  DocumentReference,
   DocumentSnapshot,
   getDoc,
   QueryDocumentSnapshot,
 } from 'firebase/firestore';
-import { IVoteToken, VoteToken } from '@evote/core';
+import {
+  IVoteObject, IVoter, IVoteToken, VoteToken,
+} from '@evote/core';
 import { httpsCallable } from 'firebase/functions';
 import { getAuth, getDb, getFns } from 'src/firebase';
 import { BaseEntityConverter } from 'src/modules/BaseEntity';
@@ -12,7 +15,11 @@ import { BaseEntityConverter } from 'src/modules/BaseEntity';
 export const VoteTokenConverter = {
   toEntity(snapshot: QueryDocumentSnapshot<IVoteToken>): VoteToken {
     const base = BaseEntityConverter.fillEntity(snapshot);
-    return new VoteToken().fill(base);
+    return new VoteToken().fill({
+      ...base,
+      voted: (base.voted as unknown as DocumentReference<IVoteObject> | undefined)?.id,
+      voter: (base.voter as unknown as DocumentSnapshot<IVoter>).id,
+    });
   },
 };
 

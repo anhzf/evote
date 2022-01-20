@@ -23,6 +23,9 @@
           "source": "**",
           "destination": "/index.html"
         }
+      ],
+      "predeploy": [
+        "node build.js"
       ]
     },
     {
@@ -38,6 +41,9 @@
           "source": "**",
           "destination": "/index.html"
         }
+      ],
+      "predeploy": [
+        "node build.js"
       ]
     }
   ],
