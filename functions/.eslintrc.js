@@ -28,5 +28,7 @@ module.exports = {
     "quotes": ["error", "double"],
     "import/no-unresolved": 0,
     "max-len": ["warn", 150],
+
+    "@typescript-eslint/explicit-module-boundary-types": 0,
   },
 };

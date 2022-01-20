@@ -1,11 +1,14 @@
 import {
-  collection, getDocs, limit, query, QueryDocumentSnapshot, where,
+  collection, doc, DocumentData, getDoc, getDocs, limit, query, QueryDocumentSnapshot, where,
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
-import { getDb, getFns } from 'src/firebase';
+import { getDownloadURL, ref } from 'firebase/storage';
+import { getDb, getFns, getStorage } from 'src/firebase';
 import { BaseEntityConverter } from 'src/modules/BaseEntity';
-import { IVotingEvent, VotingEvent } from '@evote/core';
-import { collectionName } from '~/shared/firestoreReferences';
+import {
+  IVoteObject, IVotingEvent, VoteObject, VotingEvent,
+} from '@evote/core';
+import { collectionName as cn, votingEventInfoKey } from '~/shared/firestoreReferences';
 
 export const VotingEventConverter = {
   toEntity(snapshot: QueryDocumentSnapshot<IVotingEvent>): VotingEvent {
@@ -23,7 +26,7 @@ export const getUserVotingEvents = async () => {
 
 export const getVotingEventByUrl = async (url: string) => {
   const db = getDb();
-  const collectionRef = collection(db, collectionName.VotingEvent);
+  const collectionRef = collection(db, cn.VotingEvent);
   const q = query(collectionRef, where('url', '==', url), limit(1));
   const snapshot = await getDocs(q);
   const [picked] = snapshot.docs as QueryDocumentSnapshot<IVotingEvent>[];
@@ -31,4 +34,41 @@ export const getVotingEventByUrl = async (url: string) => {
   return picked?.exists()
     ? VotingEventConverter.toEntity(picked)
     : undefined;
+};
+
+export const getVotingEventImage = (votingEventId: string) => {
+  const storage = getStorage();
+  const imgRef = ref(storage, `${cn.VotingEvent}/${votingEventId}/MainBanner`);
+
+  return getDownloadURL(imgRef);
+};
+
+interface IVotingEventSummary {
+  // k is VoteObject.id
+  [k: string]: number;
+}
+
+export const getVotingEventSummary = async (votingEventId: string) => {
+  const db = getDb();
+  const fns = getFns();
+  const getDocsByPath = httpsCallable<{paths: string[]}, DocumentData[]>(fns, 'getDocumentsByFullPath');
+  const summaryRef = doc(db, `${cn.VotingEvent}/${votingEventId}/Info/${votingEventInfoKey.summary}`);
+  const summarySnapshot = await getDoc(summaryRef) as QueryDocumentSnapshot<IVotingEventSummary>;
+  const summary = summarySnapshot.data();
+  const ids = Object.keys(summary);
+  const paths = ids.map((k) => `${cn.VotingEvent}/${votingEventId}/${cn.VoteObject}/${k}`);
+  const { data } = await getDocsByPath({ paths });
+  const voteObjects = data.map((el, i) => {
+    const voteObject = new VoteObject().fill({
+      ...el as IVoteObject,
+      id: ids[i],
+    });
+
+    return {
+      voteObject,
+      count: summary[voteObject.id],
+    };
+  });
+
+  return voteObjects;
 };

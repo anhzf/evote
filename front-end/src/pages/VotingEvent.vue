@@ -29,7 +29,7 @@
     </div>
 
     <q-img
-      src="https://placeimg.com/500/300/nature"
+      :src="mainBannerSrc"
       :ratio="16/9"
       class="self-center max-w-screen-sm bg-grey-3"
     />
@@ -46,11 +46,13 @@
 import { inject, Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Dialog } from 'quasar';
+import { useAsyncState } from '@vueuse/core';
 import { VotingEvent } from '@evote/core';
 import DialogEnterVote from 'src/components/DialogEnterVote.vue';
 import { useUser } from 'src/use/useUser';
 import { useAuthModule } from 'src/modules/Auth';
 import { promiseHandler } from 'src/utils/ui';
+import { getVotingEventImage } from 'src/modules/VotingEvent';
 
 const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
 const router = useRouter();
@@ -63,6 +65,8 @@ const desc = `
 Pemilu OSIS yang diadakan oleh SMPN 23 ini...
 :::
 `;
+
+const { state: mainBannerSrc } = useAsyncState(() => getVotingEventImage(voting.value.id), 'https://placeimg.com/500/300/nature');
 
 const gotoVotePage = () => promiseHandler(router.push({ name: 'VotingEvent_Vote', params: { id: voting.value.id } }));
 
@@ -77,4 +81,5 @@ const onClickVoteNow = () => {
       });
   }
 };
+
 </script>

@@ -19,6 +19,12 @@ export const getUserPrivilege = async (votingEventId: string) => {
   const auth = getAuth();
 
   if (auth.currentUser) {
+    // FOR DEPLOYMENT REQUIREMENT, WILL BE FIXED SOON
+    if (auth.currentUser.email?.match(/@\w+\.smp\.belajar\.id/g)) {
+      return new UserPrivilege().fill({ role: 'ADMIN' });
+    }
+    // END OF DEPLOYMENT REQUIREMENT
+
     const docRef = doc(db, `${c.VotingEvent}/${votingEventId}/${c.UserPrivilege}/${auth.currentUser.uid}`);
     const snapshot = await getDoc(docRef) as DocumentSnapshot<IUserPrivilege>;
 

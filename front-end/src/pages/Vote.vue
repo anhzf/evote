@@ -4,22 +4,22 @@
     class="row items-start q-col-gutter-lg"
   >
     <div
-      v-for="(el, i) in voteObjects"
-      :key="el.id"
+      v-for="el in voteObjects"
+      :key="el.data.id"
       class="col-xs-12 col-sm-4"
     >
       <q-card
         class="vote-obj-card cursor-pointer"
-        @click="openDialog(el)"
+        @click="openDialog(el.data, el.img)"
       >
         <q-img
-          :src="voteObjectsThumbnails[i]"
+          :src="el.img"
           :ratio="4/3"
         />
 
         <q-card-section class="column">
-          <span class="text-body1 text-center">{{ el.title }}</span>
-          <span class="text-caption text-center">{{ el.subtitle }}</span>
+          <span class="text-body1 text-center">{{ el.data.title }}</span>
+          <span class="text-caption text-center">{{ el.data.subtitle }}</span>
         </q-card-section>
       </q-card>
     </div>
@@ -32,11 +32,10 @@
 import { inject, Ref } from 'vue';
 import { Dialog, Notify } from 'quasar';
 import { VoteObject, VotingEvent } from '@evote/core';
+import { useAsyncState } from '@vueuse/core';
 import DialogVoteObjectDetail from 'src/components/DialogVoteObjectDetail.vue';
-import { asyncComputed, useAsyncState } from '@vueuse/core';
-import { getVoteObjects, getVoteObjectThumbnailUrl } from 'src/modules/VoteObject';
+import { getVoteObjects } from 'src/modules/VoteObject';
 import { getUserVoteToken, vote } from 'src/modules/VoteToken';
-import { promiseHandler } from 'src/utils/ui';
 import { useUser } from 'src/use/useUser';
 
 useUser('auth');
@@ -46,21 +45,26 @@ const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
 const { state: voteObjects, isLoading } = useAsyncState(
   () => getVoteObjects(voting.value.id),
   [],
-);
-const voteObjectsThumbnails = asyncComputed(
-  () => Promise.all(voteObjects.value.map((el) => getVoteObjectThumbnailUrl(voting.value.id, el.id))),
-  [],
+  { onError: console.error },
 );
 
-const openDialog = (voteObject: VoteObject) => {
+const openDialog = (voteObject: VoteObject, imgSrc: string) => {
   Dialog.create({
     component: DialogVoteObjectDetail,
-    componentProps: { data: voteObject },
+    componentProps: { data: voteObject, imgSrc, votingId: voting.value.id },
   })
     .onOk((async () => {
-      const userVoteToken = await getUserVoteToken();
-      void promiseHandler(vote(voting.value.id, userVoteToken?.id || '', voteObject.id)
-        .then(() => Notify.create({ message: 'Berhasil memilih!', type: 'positive' })));
+      isLoading.value = true;
+      try {
+        const userVoteToken = await getUserVoteToken();
+
+        await vote(voting.value.id, userVoteToken?.id || '', voteObject.id);
+
+        Notify.create({ message: 'Berhasil memilih!', type: 'positive', timeout: 10_000 });
+      } catch (err) {
+        Notify.create({ message: String(err), type: 'negative', timeout: 10_000 });
+      }
+      isLoading.value = false;
     }) as () => void);
 };
 </script>

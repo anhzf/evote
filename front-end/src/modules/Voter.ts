@@ -1,8 +1,8 @@
 import {
-  collection, CollectionReference, doc, getDoc, query, QueryDocumentSnapshot, startAt, writeBatch, orderBy, where, limit, getDocs, QuerySnapshot,
+  collection, CollectionReference, doc, getDoc, query, QueryDocumentSnapshot, writeBatch, where, getDocs, QuerySnapshot,
 } from 'firebase/firestore';
 import { Voter } from '@evote/core';
-import { getAuth, getDb } from 'src/firebase';
+import { getDb } from 'src/firebase';
 import { BaseEntityConverter } from 'src/modules/BaseEntity';
 import { collectionName as c, votingEventInfoKey } from '~/shared/firestoreReferences';
 import { arrayChunks } from '~/shared/utils/array';
@@ -46,16 +46,15 @@ export const getVoterListCount = async (votingEventId: string) => {
   return Number(voterMeta.data()?.count || 0);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const fetchVoterList = async (votingEventId: string, start = 0, offset = 0, filter = '', sortBy = 'meta.NAMA', isDesc = false) => {
   const db = getDb();
   const voterCollectionRef = collection(db, `${c.VotingEvent}/${votingEventId}/${c.Voter}`);
 
   if (filter) {
+    // TODO: support the given params
     const q = query(voterCollectionRef,
-      where(sortBy, '==', filter),
-      orderBy(sortBy, isDesc ? 'desc' : 'asc'),
-      startAt(start),
-      limit(offset > 0 ? offset : Infinity));
+      where(sortBy, '==', filter));
     const voters = await getDocs(q) as QuerySnapshot<Voter>;
 
     return voters.docs.map((el) => VoterConverter.toEntity(el));

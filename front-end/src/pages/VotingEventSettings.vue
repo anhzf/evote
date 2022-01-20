@@ -1,6 +1,28 @@
 <template>
   <q-page padding>
-    VotingEventSettings: {{ voting }}
+    <div class="column items-stretch fit max-w-screen-xs q-mx-auto">
+      <h6 class="q-mt-md q-mb-lg">
+        Pengaturan
+      </h6>
+
+      <q-card class="flex-grow">
+        <q-list>
+          <q-item>
+            <q-item-section>
+              <q-item-label>Reset pemilihan</q-item-label>
+            </q-item-section>
+
+            <q-item-section side>
+              <q-btn
+                label="Reset"
+                push
+                color="red"
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+    </div>
 
     <q-inner-loading :showing="isUserPrivilegeLoading" />
   </q-page>

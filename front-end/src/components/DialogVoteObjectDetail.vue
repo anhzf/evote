@@ -1,11 +1,10 @@
 <template>
   <q-dialog
     ref="dialogRef"
-    full-width
     full-height
     @hide="onDialogHide"
   >
-    <q-card class="q-dialog-plugin column no-wrap">
+    <q-card class="q-dialog-plugin column no-wrap w-full max-w-screen-sm">
       <q-card-section class="row justify-between items-center">
         <h6 class="q-my-none">
           {{ data.title }}
@@ -22,7 +21,7 @@
 
       <q-card-section class="column no-wrap scroll">
         <q-img
-          :src="`https://i.pravatar.cc/200?u=${data.title}`"
+          :src="imgSrc"
           width="100%"
           height="60vh"
           class="flex-shrink-0 self-center max-w-screen-xs"
@@ -31,7 +30,7 @@
         <q-markdown
           :src="desc"
           no-html
-          class="self-center full-width"
+          class="flex-grow self-center full-width"
         />
       </q-card-section>
 
@@ -59,30 +58,23 @@
 import { defineProps, defineEmits } from 'vue';
 import { useDialogPluginComponent } from 'quasar';
 import { VoteObject } from '@evote/core';
+import { useAsyncState } from '@vueuse/core';
+import { getVoteObjectDescUrl } from 'src/modules/VoteObject';
 
 interface Props {
+  votingId: string;
   data: VoteObject;
+  imgSrc: string;
 }
 
 defineEmits([...useDialogPluginComponent.emits]);
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const {
   dialogRef, onDialogHide, onDialogOK, onDialogCancel,
 } = useDialogPluginComponent();
-const desc = `:::
-**Visi**
-- Menyejahterakan rakyat Indonesia
-- Lorem ipsum lorem ipsum
 
-**Misi**
-- Menyejahterakan rakyat Indonesia
-- Lorem ipsum lorem ipsum
-
-**Program Unggulan**
-- Menyejahterakan rakyat Indonesia
-- Lorem ipsum lorem ipsum
-:::`;
+const { state: desc } = useAsyncState(getVoteObjectDescUrl(props.votingId, props.data.id), '');
 
 const onOKClick = () => {
   onDialogOK();
