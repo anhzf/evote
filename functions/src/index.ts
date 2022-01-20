@@ -55,28 +55,42 @@ export const onVoteTokenChange = functions.firestore
       const votingEventInfoSummaryDocRef = getDb()
           .doc(`${cn.VotingEvent}/${votingEventId}/Info/${votingEventInfoKey.summary}`);
 
-      if (change.before.exists && change.after.exists) {
+      if (!change.before.exists) {
+        // New document created
+        votingEventInfoSummaryDocRef.set({total: FieldValue.increment(1)}, {merge: true});
+      } else if (change.before.exists && change.after.exists) {
         // Updating existing document
         const data = change.after.data() as IVoteToken;
         const voted = data.voted as (FirebaseFirestore.DocumentReference<IVoteObject> | undefined);
 
+        // If voted, increment voted and used count. otherwise, decrement voted and used count.
         if (voted) {
-          votingEventInfoSummaryDocRef.set({[voted.id]: FieldValue.increment(1)}, {merge: true});
+          votingEventInfoSummaryDocRef.set({
+            [voted.id]: FieldValue.increment(1),
+            used: FieldValue.increment(1),
+          }, {merge: true});
         } else {
           const oldData = change.before.data() as IVoteToken;
           const oldVoted = oldData.voted as (FirebaseFirestore.DocumentReference<IVoteObject> | undefined);
 
           if (oldVoted) {
-            votingEventInfoSummaryDocRef.set({[oldVoted.id]: FieldValue.increment(-1)}, {merge: true});
+            votingEventInfoSummaryDocRef.set({
+              [oldVoted.id]: FieldValue.increment(-1),
+              used: FieldValue.increment(-1),
+            }, {merge: true});
           }
         }
       } else if (!change.after.exists) {
-        // Deleting document : subtract one from count
+        // Deleting document
         const data = change.before.data() as IVoteToken;
         const voted = data.voted as (FirebaseFirestore.DocumentReference<IVoteObject> | undefined);
 
         if (voted) {
-          votingEventInfoSummaryDocRef.set({[voted.id]: FieldValue.increment(-1)}, {merge: true});
+          votingEventInfoSummaryDocRef.set({
+            [voted.id]: FieldValue.increment(-1),
+            used: FieldValue.increment(-1),
+            total: FieldValue.increment(-1),
+          }, {merge: true});
         }
       }
     });
@@ -129,6 +143,7 @@ export const getVoteToken = functions.https.onCall(async (data, context) => {
 
   const collectionRef = getDb().collection(`${cn.VotingEvent}/${votingEventId}/${cn.VoteToken}`);
   const voterRef = getDb().doc(`${cn.VotingEvent}/${votingEventId}/${cn.Voter}/${voterId}`);
+
   const q = collectionRef
       .where("voter", "==", voterRef)
       .where("deletedAt", "==", null)

@@ -20,7 +20,8 @@
     },
 		"conventionalCommits.scopes": [
 			"core",
-			"fe"
+			"fe",
+			"fns"
 		],
 		"typescript.tsdk": "root\\node_modules\\typescript\\lib"
 	}
