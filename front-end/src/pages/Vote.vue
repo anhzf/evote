@@ -30,6 +30,7 @@
 
 <script lang="ts" setup>
 import { inject, Ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { Dialog, Notify } from 'quasar';
 import { VoteObject, VotingEvent } from '@evote/core';
 import { useAsyncState } from '@vueuse/core';
@@ -41,6 +42,7 @@ import { useUser } from 'src/use/useUser';
 useUser('auth');
 
 const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
+const router = useRouter();
 
 const { state: voteObjects, isLoading } = useAsyncState(
   () => getVoteObjects(voting.value.id),
@@ -59,8 +61,8 @@ const openDialog = (voteObject: VoteObject, imgSrc: string) => {
         const userVoteToken = await getUserVoteToken();
 
         await vote(voting.value.id, userVoteToken?.id || '', voteObject.id);
-
         Notify.create({ message: 'Berhasil memilih!', type: 'positive', timeout: 10_000 });
+        await router.push({ name: 'VotingEvent_VoteFinish' });
       } catch (err) {
         Notify.create({ message: String(err), type: 'negative', timeout: 10_000 });
       }
