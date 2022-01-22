@@ -8,17 +8,10 @@
       style="min-height: 80vh;"
     >
       <ResultChart :data="votingResult" />
-      <q-inner-loading :showing="isLoading" />
+      <q-inner-loading :showing="UIState.isLoading" />
     </div>
 
     <div class="column items-stretch q-gutter-y-md">
-      <q-btn
-        label="Segarkan"
-        icon="refresh"
-        color="primary"
-        @click="refresh"
-      />
-
       <code
         class="debug flex-grow"
         v-text="JSON.stringify(readableVotingResult, null, 2)"
@@ -28,37 +21,29 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, computed, Ref } from 'vue';
-import { VotingEvent } from '@evote/core';
-import { useAsyncState } from '@vueuse/core';
+import {
+  inject, reactive, shallowRef, computed, Ref, onUnmounted, watch,
+} from 'vue';
+import { Unsubscribe } from 'firebase/firestore';
+import { VoteObject, VotingEvent } from '@evote/core';
 import ResultChart from 'src/components/ResultChart.vue';
-import { getVotingEventSummary } from 'src/modules/VotingEvent';
+import { listenVotingEventSummary } from 'src/modules/VotingEvent';
 import { getVoterListCount } from 'src/modules/Voter';
 
 const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
-
-const getData = async () => {
-  const summary = await getVotingEventSummary(voting.value.id);
-  const voterCount = await getVoterListCount(voting.value.id);
-
-  return {
-    voteObjects: summary.voteObjects,
-    used: summary.used,
-    total: summary.total,
-    voterCount,
-  };
-};
-const { state: votingResult, isLoading, execute: refresh } = useAsyncState(
-  getData,
-  {
-    voteObjects: [], used: 0, total: 0, voterCount: 0,
-  },
-  { onError: console.error },
-);
+const UIState = reactive({
+  isLoading: false,
+});
+const votingResult = shallowRef({
+  used: 0,
+  total: 0,
+  voteObjects: [] as { voteObject: VoteObject; count: number; }[],
+  voterCount: 0,
+});
 const readableVotingResult = computed(() => ({
   'Suara digunakan': votingResult.value.used,
   'Jumlah pemilih terdaftar': votingResult.value.voterCount,
-  // 'total suara': votingResult.value.total,
+  'Total suara': votingResult.value.total,
   ...votingResult.value.voteObjects.reduce(
     (acc, { voteObject, count }) => ({
       ...acc,
@@ -67,6 +52,27 @@ const readableVotingResult = computed(() => ({
     {},
   ),
 }));
+
+let unsubscribe: Unsubscribe;
+
+onUnmounted(() => unsubscribe?.());
+
+watch(voting, (v) => {
+  UIState.isLoading = true;
+  unsubscribe?.();
+  unsubscribe = listenVotingEventSummary(v.id, (data) => {
+    getVoterListCount(v.id)
+      .then((voterCount) => {
+        votingResult.value = {
+          ...data,
+          voterCount,
+        };
+        UIState.isLoading = false;
+      })
+      .catch(console.error);
+  }, console.error);
+}, { immediate: true });
+
 </script>
 
 <style lang="sass" scoped>

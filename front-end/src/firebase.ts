@@ -7,6 +7,8 @@ import config from 'src/config';
 
 const firebaseApp = initializeApp(config.firebase.config);
 
+const STORAGE_BUCKET = config.firebase.useEmulator ? 'gs://default-bucket/' : config.firebase.config.storageBucket;
+
 let auth: Auth;
 let db: Firestore;
 let fns: Functions;
@@ -40,7 +42,7 @@ const getAuth = () => {
 
 const getFns = () => {
   if (!fns) {
-    fns = getFunctions(firebaseApp, 'us-central1');
+    fns = getFunctions(firebaseApp);
 
     if (config.firebase.useEmulator) {
       connectFunctionsEmulator(fns, config.firebase.emulatorHost, config.firebase.emulatorPort.functions);
@@ -52,7 +54,7 @@ const getFns = () => {
 
 const getStorage = () => {
   if (!storage) {
-    storage = fbGetStorage(firebaseApp);
+    storage = fbGetStorage(firebaseApp, STORAGE_BUCKET);
 
     if (config.firebase.useEmulator) {
       connectStorageEmulator(storage, config.firebase.emulatorHost, config.firebase.emulatorPort.storage);

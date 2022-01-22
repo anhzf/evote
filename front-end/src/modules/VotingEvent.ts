@@ -1,13 +1,14 @@
 import {
-  collection, doc, DocumentData, getDoc, getDocs, limit, query, QueryDocumentSnapshot, where,
+  collection, doc, DocumentReference, getDoc, getDocs, limit, onSnapshot, query, QueryDocumentSnapshot, where,
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { getDownloadURL, ref } from 'firebase/storage';
-import { getDb, getFns, getStorage } from 'src/firebase';
-import { BaseEntityConverter } from 'src/modules/BaseEntity';
 import {
   IVoteObject, IVotingEvent, VoteObject, VotingEvent,
 } from '@evote/core';
+import { getDb, getFns, getStorage } from 'src/firebase';
+import { BaseEntityConverter } from 'src/modules/BaseEntity';
+import { getDocsByPaths } from 'src/modules/common';
 import { collectionName as cn, votingEventInfoKey } from '~/shared/firestoreReferences';
 
 export const VotingEventConverter = {
@@ -50,33 +51,65 @@ interface IVotingEventSummary {
   [k: string]: number;
 }
 
+export const getVoteObjects = async (votingEventId: string, ...ids: string[]) => {
+  const paths = ids.map((id) => `${cn.VotingEvent}/${votingEventId}/${cn.VoteObject}/${id}`);
+  const docs = await getDocsByPaths(...paths);
+  return docs.map((el, i) => new VoteObject().fill({
+    ...el as IVoteObject,
+    id: ids[i],
+  }));
+};
+
 export const getVotingEventSummary = async (votingEventId: string) => {
   const db = getDb();
-  const fns = getFns();
-  const getDocsByPath = httpsCallable<{paths: string[]}, DocumentData[]>(fns, 'getDocumentsByFullPath');
   const summaryRef = doc(db, `${cn.VotingEvent}/${votingEventId}/Info/${votingEventInfoKey.summary}`);
   const summarySnapshot = await getDoc(summaryRef) as QueryDocumentSnapshot<IVotingEventSummary>;
   const { used, total, ...summary } = summarySnapshot.data();
+  // get the VoteObject details info
   const ids = Object.keys(summary);
-  const paths = ids.map((k) => `${cn.VotingEvent}/${votingEventId}/${cn.VoteObject}/${k}`);
-  const { data } = await getDocsByPath({ paths });
-  const voteObjects = data.map((el, i) => {
-    const voteObject = new VoteObject().fill({
-      ...el as IVoteObject,
-      id: ids[i],
-    });
+  const data = await getVoteObjects(votingEventId, ...ids);
+  const voteObjects = data.map((el) => ({
+    voteObject: el,
+    count: summary[el.id],
+  }));
 
-    return {
-      voteObject,
-      count: summary[voteObject.id],
-    };
+  return { used, total, voteObjects };
+};
+
+type VotingEventSummaryListener = (data: {
+  used: number;
+  total: number;
+  voteObjects: {
+    voteObject: VoteObject;
+    count: number;
+  }[];
+}) => void;
+
+export const listenVotingEventSummary = (
+  votingEventId: string,
+  listener: VotingEventSummaryListener,
+  onError?: (reason: unknown) => void,
+) => {
+  const db = getDb();
+  const summaryRef = doc(db, `${cn.VotingEvent}/${votingEventId}/Info/${votingEventInfoKey.summary}`) as DocumentReference<IVotingEventSummary>;
+
+  return onSnapshot(summaryRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const { used, total, ...summary } = snapshot.data();
+      const voteObjectIds = Object.keys(summary);
+
+      getVoteObjects(votingEventId, ...voteObjectIds)
+        .then((data) => listener({
+          used,
+          total,
+          voteObjects: data.map((el) => ({
+            voteObject: el,
+            count: summary[el.id],
+          })),
+        }))
+        .catch((err) => onError?.(err));
+    }
   });
-
-  return {
-    used,
-    total,
-    voteObjects,
-  };
 };
 
 export const validateVotingEventResult = httpsCallable<{ votingEventId: string }, void>(getFns(), 'validateVoteResult');
