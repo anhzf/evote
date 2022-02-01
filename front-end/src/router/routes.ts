@@ -54,6 +54,17 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/john',
+    component: () => import('layouts/VotingEventLayout.vue'),
+    children: [
+      {
+        path: 'settings',
+        name: 'AccountName_Settings',
+        component: () => import('pages/AccountSettings.vue'),
+      },
+    ],
+  },
 
   // Always leave this as last one,
   // but you can also remove it
