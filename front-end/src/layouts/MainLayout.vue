@@ -76,6 +76,11 @@ const userNavItems = Object.freeze<SidebarNavItem[]>([
     to: { name: 'VotingEvents' },
   },
   {
+    label: 'Akun saya',
+    icon: 'settings',
+    to: { name: 'AccountSettings' },
+  },
+  {
     label: 'Keluar',
     icon: 'logout',
     clickable: true,

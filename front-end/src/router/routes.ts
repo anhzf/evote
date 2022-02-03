@@ -15,6 +15,11 @@ const routes: RouteRecordRaw[] = [
         name: 'VotingEvents',
         component: () => import('pages/VotingEventList.vue'),
       },
+      {
+        path: 'settings',
+        name: 'AccountSettings',
+        component: () => import('pages/AccountSettings.vue'),
+      },
     ],
   },
   {
@@ -51,17 +56,6 @@ const routes: RouteRecordRaw[] = [
         path: 'settings',
         name: 'VotingEvent_Settings',
         component: () => import('pages/VotingEventSettings.vue'),
-      },
-    ],
-  },
-  {
-    path: '/john',
-    component: () => import('layouts/VotingEventLayout.vue'),
-    children: [
-      {
-        path: 'settings',
-        name: 'AccountName_Settings',
-        component: () => import('pages/AccountSettings.vue'),
       },
     ],
   },

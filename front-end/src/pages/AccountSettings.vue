@@ -1,71 +1,49 @@
 <template>
   <q-page padding>
-    <div class="column items-stretch max-w-screen-xs q-mx-auto q-gutter-y-xl">
-      <div class="column items-center">
-        <div class="col justify-center">
-          <div class="row items-end q-gutter-x-sm">
-            <q-btn round>
-              <q-avatar size="150px">
-                <img src="https://cdn.quasar.dev/img/avatar.png">
-              </q-avatar>
-            </q-btn>
-            <q-icon
-              name="edit"
-              size="sm"
+    <div class="column items-stretch fit max-w-screen-xs q-mx-auto">
+      <q-card
+        flat
+        class="flex-grow"
+      >
+        <q-list padding>
+          <q-item class="justify-center items-end q-gutter-x-sm q-mb-md">
+            <q-avatar size="150px">
+              <q-img :src="user?.photoURL || `https://i.pravatar.cc/150?u=${user?.uid}`" />
+            </q-avatar>
+            <q-btn
+              icon="edit"
+              round
+              flat
             />
-          </div>
-        </div>
-      </div>
+          </q-item>
 
-      <div class="col">
-        <span>Nama Anda</span>
-        <q-input
-          v-model="name"
-          style="width: 100%"
-          :dense="dense"
-        >
-          <template #append>
-            <q-icon
-              name="edit"
-              class="cursor-pointer"
-              @click="name = ''"
-            />
-          </template>
-        </q-input>
-      </div>
+          <q-item>
+            <q-item-section>
+              <q-input
+                label="Nama Anda"
+                :model-value="user?.displayName"
+                readonly
+              />
+            </q-item-section>
+          </q-item>
 
-      <div class="col">
-        <span>Email Anda</span>
-        <q-input
-          v-model="name"
-          style="width: 100%"
-          :dense="dense"
-        >
-          <template #append>
-            <q-icon
-              name="edit"
-              class="cursor-pointer"
-              @click="name = ''"
-            />
-          </template>
-        </q-input>
-      </div>
+          <q-item>
+            <q-item-section>
+              <q-input
+                label="Email Anda"
+                :model-value="user?.email"
+                readonly
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
     </div>
   </q-page>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
+<script lang="ts" setup>
 import { useUser } from 'src/use/useUser';
 
-useUser('auth');
-
-export default defineComponent({
-  setup() {
-    return {
-      name: ref(''),
-      dense: ref(false),
-    };
-  },
-});
+const user = useUser('auth');
 </script>
