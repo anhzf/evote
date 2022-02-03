@@ -1,68 +1,59 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth as fbGetAuth, connectAuthEmulator, Auth } from 'firebase/auth';
-import { initializeFirestore, connectFirestoreEmulator, Firestore } from 'firebase/firestore';
-import { getFunctions, Functions, connectFunctionsEmulator } from 'firebase/functions';
-import { getStorage as fbGetStorage, connectStorageEmulator, FirebaseStorage } from 'firebase/storage';
+import { getAnalytics as fbGetAnalytics } from 'firebase/analytics';
+import { getAuth as fbGetAuth, connectAuthEmulator } from 'firebase/auth';
+import { initializeFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import { getStorage as fbGetStorage, connectStorageEmulator } from 'firebase/storage';
 import config from 'src/config';
+import { singleton } from '~/shared/utils/function';
 
 const firebaseApp = initializeApp(config.firebase.config);
 
 const STORAGE_BUCKET = config.firebase.useEmulator ? 'gs://default-bucket/' : config.firebase.config.storageBucket;
 
-let auth: Auth;
-let db: Firestore;
-let fns: Functions;
-let storage: FirebaseStorage;
+const getDb = singleton(() => {
+  const db = initializeFirestore(firebaseApp, {
+    ignoreUndefinedProperties: true,
+  });
 
-const getDb = () => {
-  if (!db) {
-    db = initializeFirestore(firebaseApp, {
-      ignoreUndefinedProperties: true,
-    });
-
-    if (config.firebase.useEmulator) {
-      connectFirestoreEmulator(db, config.firebase.emulatorHost, config.firebase.emulatorPort.firestore);
-    }
+  if (config.firebase.useEmulator) {
+    connectFirestoreEmulator(db, config.firebase.emulatorHost, config.firebase.emulatorPort.firestore);
   }
 
   return db;
-};
+});
 
-const getAuth = () => {
-  if (!auth) {
-    auth = fbGetAuth(firebaseApp);
+const getAuth = singleton(() => {
+  const auth = fbGetAuth(firebaseApp);
 
-    if (config.firebase.useEmulator) {
-      connectAuthEmulator(auth, `http://${config.firebase.emulatorHost}:${config.firebase.emulatorPort.auth}`);
-    }
+  if (config.firebase.useEmulator) {
+    connectAuthEmulator(auth, `http://${config.firebase.emulatorHost}:${config.firebase.emulatorPort.auth}`);
   }
 
   return auth;
-};
+});
 
-const getFns = () => {
-  if (!fns) {
-    fns = getFunctions(firebaseApp);
+const getFns = singleton(() => {
+  const fns = getFunctions(firebaseApp);
 
-    if (config.firebase.useEmulator) {
-      connectFunctionsEmulator(fns, config.firebase.emulatorHost, config.firebase.emulatorPort.functions);
-    }
+  if (config.firebase.useEmulator) {
+    connectFunctionsEmulator(fns, config.firebase.emulatorHost, config.firebase.emulatorPort.functions);
   }
 
   return fns;
-};
+});
 
-const getStorage = () => {
-  if (!storage) {
-    storage = fbGetStorage(firebaseApp, STORAGE_BUCKET);
+const getStorage = singleton(() => {
+  const storage = fbGetStorage(firebaseApp, STORAGE_BUCKET);
 
-    if (config.firebase.useEmulator) {
-      connectStorageEmulator(storage, config.firebase.emulatorHost, config.firebase.emulatorPort.storage);
-    }
+  if (config.firebase.useEmulator) {
+    connectStorageEmulator(storage, config.firebase.emulatorHost, config.firebase.emulatorPort.storage);
   }
 
   return storage;
-};
+});
+
+const getAnalytics = singleton(() => fbGetAnalytics());
 
 export {
   firebaseApp as default,
@@ -70,4 +61,5 @@ export {
   getAuth,
   getFns,
   getStorage,
+  getAnalytics,
 };

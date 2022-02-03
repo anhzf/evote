@@ -3,7 +3,7 @@ import {initializeApp} from "firebase-admin/app";
 import {getAuth as fbGetAuth} from "firebase-admin/auth";
 import {FieldPath, FieldValue, getFirestore} from "firebase-admin/firestore";
 // import {IVoteObject, IVoteToken, IVotingEvent, UserData, VoteToken, VotingEvent} from "@evote/core/dist/cjs";
-import {IVoteObject, IVoteToken, IVotingEvent, UserData, VoteToken, VotingEvent} from "../../shared/core";
+import {IVoteObject, IVoter, IVoteToken, IVotingEvent, UserData, VoteToken, VotingEvent} from "../../shared/core";
 import {collectionName as cn, votingEventInfoKey} from "../../shared/firestoreReferences";
 import {singleton} from "./utils/function";
 
@@ -141,27 +141,33 @@ export const getVoteToken = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError("invalid-argument", "votingEventId and voterId are required");
   }
 
-  const collectionRef = getDb().collection(`${cn.VotingEvent}/${votingEventId}/${cn.VoteToken}`);
-  const voterRef = getDb().doc(`${cn.VotingEvent}/${votingEventId}/${cn.Voter}/${voterId}`);
+  const db = getDb();
+  const collectionRef = db.collection(`${cn.VotingEvent}/${votingEventId}/${cn.VoteToken}`) as FirebaseFirestore.CollectionReference<IVoteToken>;
+  const voterRef = db.doc(`${cn.VotingEvent}/${votingEventId}/${cn.Voter}/${voterId}`) as FirebaseFirestore.DocumentReference<IVoter>;
 
   const q = collectionRef
       .where("voter", "==", voterRef)
       .where("deletedAt", "==", null)
       .limit(1);
-  const {docs: [picked]} = await q.get() as FirebaseFirestore.QuerySnapshot<IVoteToken>;
 
-  if (picked) {
+  return db.runTransaction(async (t) => {
+    const doc = await t.get(q);
+
+    if (doc.empty) {
+      const voteToken = new VoteToken().fill({voter: voterRef.path});
+      const {id, ...pick} = voteToken.toObj();
+
+      t.create(collectionRef.doc(), {
+        ...pick,
+        voter: voterRef as unknown as string,
+      } as IVoteToken);
+
+      return voteToken.toObj();
+    }
+
+    const [picked] = doc.docs;
     return new VoteToken().fill({...picked.data(), id: picked.id}).toObj();
-  }
-
-  // create the new ones
-  const newDocRef = collectionRef.doc();
-  const voteToken = new VoteToken().fill({id: newDocRef.id, voter: voterId});
-  const {id, ...tokenData} = voteToken.toObj();
-
-  await newDocRef.set({...tokenData, voter: voterRef}, {merge: true});
-
-  return voteToken.toObj();
+  });
 });
 
 export const loginWithVoteToken = functions.https.onCall(async (data) => {
