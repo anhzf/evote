@@ -73,13 +73,13 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { Dialog, QTableColumn, QTableProps } from 'quasar';
-import { Voter, VotingEvent } from '@evote/core';
+import DialogVoterCSVDataImport from 'src/components/DialogVoterCSVDataImport.vue';
+import VoterListTokenView from 'src/components/VotingEvent/VoterListTokenView.vue';
 import { useUserPrivilege } from 'src/use/useUserPrivilege';
 import { useUser } from 'src/use/useUser';
-import DialogVoterCSVDataImport from 'src/components/DialogVoterCSVDataImport.vue';
 import { useAsyncState } from '@vueuse/core';
 import { fetchVoterList, getVoterListCount } from 'src/modules/Voter';
-import VoterListTokenView from 'src/components/VotingEvent/VoterListTokenView.vue';
+import { Voter, VotingEvent } from '~/shared/core';
 
 useUser('auth');
 

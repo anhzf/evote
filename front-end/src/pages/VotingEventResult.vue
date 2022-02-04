@@ -25,10 +25,10 @@ import {
   inject, reactive, shallowRef, computed, Ref, onUnmounted, watch,
 } from 'vue';
 import { Unsubscribe } from 'firebase/firestore';
-import { VoteObject, VotingEvent } from '@evote/core';
 import ResultChart from 'src/components/ResultChart.vue';
 import { listenVotingEventSummary } from 'src/modules/VotingEvent';
 import { getVoterListCount } from 'src/modules/Voter';
+import { VoteObject, VotingEvent } from '~/shared/core';
 
 const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
 const UIState = reactive({

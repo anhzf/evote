@@ -31,8 +31,8 @@
 <script lang="ts" setup>
 import { inject, Ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { VotingEvent } from '@evote/core';
 import { useUserPrivilege } from 'src/use/useUserPrivilege';
+import { VotingEvent } from '~/shared/core';
 
 const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
 

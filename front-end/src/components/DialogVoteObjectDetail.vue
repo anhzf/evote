@@ -57,9 +57,9 @@
 <script lang="ts" setup>
 import { defineProps, defineEmits } from 'vue';
 import { useDialogPluginComponent } from 'quasar';
-import { VoteObject } from '@evote/core';
 import { useAsyncState } from '@vueuse/core';
 import { getVoteObjectDescUrl } from 'src/modules/VoteObject';
+import { VoteObject } from '~/shared/core';
 
 interface Props {
   votingId: string;

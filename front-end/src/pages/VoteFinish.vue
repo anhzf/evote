@@ -30,10 +30,10 @@
 <script lang="ts" setup>
 import { inject, Ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { VotingEvent } from '@evote/core';
+import { useAuthStore } from 'src/store/useAuthStore';
 import { useUser } from 'src/use/useUser';
 import { useAuthModule } from 'src/modules/Auth';
-import { useAuthStore } from 'src/store/useAuthStore';
+import { VotingEvent } from '~/shared/core';
 
 const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
 const user = useUser('auth');

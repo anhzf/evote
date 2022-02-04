@@ -1,14 +1,14 @@
 import {
-  collection, doc, DocumentReference, getDoc, getDocs, limit, onSnapshot, query, QueryDocumentSnapshot, where,
+  collection, CollectionReference, doc, DocumentReference, getDoc, getDocs, limit, onSnapshot, query, QueryDocumentSnapshot, where,
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { getDownloadURL, ref } from 'firebase/storage';
+import { getDb, getFns, getStorage } from 'src/firebase';
+import { BaseEntityConverter, save } from 'src/modules/BaseEntity';
+import { getDocsByPaths } from 'src/modules/common';
 import {
   IVoteObject, IVotingEvent, VoteObject, VotingEvent,
-} from '@evote/core';
-import { getDb, getFns, getStorage } from 'src/firebase';
-import { BaseEntityConverter } from 'src/modules/BaseEntity';
-import { getDocsByPaths } from 'src/modules/common';
+} from '~/shared/core';
 import { collectionName as cn, votingEventInfoKey } from '~/shared/firestoreReferences';
 
 export const VotingEventConverter = {
@@ -16,6 +16,7 @@ export const VotingEventConverter = {
     const base = BaseEntityConverter.fillEntity(snapshot);
     return new VotingEvent().fill(base);
   },
+
 };
 
 export const getUserVotingEvents = async () => {
@@ -42,6 +43,18 @@ export const getVotingEventImage = (votingEventId: string) => {
   const imgRef = ref(storage, `${cn.VotingEvent}/${votingEventId}/MainBanner`);
 
   return getDownloadURL(imgRef);
+};
+
+export const createVotingEvent = async (votingEvent: VotingEvent) => {
+  const db = getDb();
+  const isUrlExists = !!(votingEvent.url && await getVotingEventByUrl(votingEvent.url));
+
+  if (isUrlExists) {
+    throw new Error('VOTING_EVENT_WITH_SAME_URL_EXISTS');
+  }
+
+  const collectionRef = collection(db, cn.VotingEvent) as CollectionReference<IVotingEvent>;
+  return save(votingEvent.toObj(), collectionRef);
 };
 
 interface IVotingEventSummary {

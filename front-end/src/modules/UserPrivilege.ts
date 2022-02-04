@@ -1,9 +1,9 @@
 import {
   doc, DocumentSnapshot, getDoc, QueryDocumentSnapshot,
 } from 'firebase/firestore';
-import { IUserPrivilege, UserPrivilege } from '@evote/core';
 import { getAuth, getDb } from 'src/firebase';
 import { BaseEntityConverter } from 'src/modules/BaseEntity';
+import { IUserPrivilege, UserPrivilege } from '~/shared/core';
 import { collectionName as c } from '~/shared/firestoreReferences';
 
 export const UserPrivilegeConverter = {

@@ -12,7 +12,7 @@ import {
 } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import randomColor from 'randomcolor';
-import { VoteObject } from '@evote/core';
+import { VoteObject } from '~/shared/core';
 
 interface Props {
   data: {

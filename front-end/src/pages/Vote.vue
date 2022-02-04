@@ -32,12 +32,12 @@
 import { inject, Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Dialog, Notify } from 'quasar';
-import { VoteObject, VotingEvent } from '@evote/core';
 import { useAsyncState } from '@vueuse/core';
 import DialogVoteObjectDetail from 'src/components/DialogVoteObjectDetail.vue';
+import { useUser } from 'src/use/useUser';
 import { getVoteObjects } from 'src/modules/VoteObject';
 import { getUserVoteToken, vote } from 'src/modules/VoteToken';
-import { useUser } from 'src/use/useUser';
+import { VoteObject, VotingEvent } from '~/shared/core';
 
 useUser('auth');
 

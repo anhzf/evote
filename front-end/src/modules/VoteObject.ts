@@ -1,10 +1,10 @@
 import {
   collection, getDocs, QueryDocumentSnapshot, QuerySnapshot,
 } from 'firebase/firestore';
-import { IVoteObject, VoteObject } from '@evote/core';
 import { getDb, getStorage } from 'src/firebase';
 import { BaseEntityConverter } from 'src/modules/BaseEntity';
 import { getDownloadURL, getBlob, ref } from 'firebase/storage';
+import { IVoteObject, VoteObject } from '~/shared/core';
 import { collectionName as cn } from '~/shared/firestoreReferences';
 
 export const VoteObjectConverter = {

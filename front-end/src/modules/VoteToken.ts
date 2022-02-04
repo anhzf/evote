@@ -5,12 +5,12 @@ import {
   getDoc,
   QueryDocumentSnapshot,
 } from 'firebase/firestore';
-import {
-  IVoteObject, IVoter, IVoteToken, VoteToken,
-} from '@evote/core';
 import { httpsCallable } from 'firebase/functions';
 import { getAuth, getDb, getFns } from 'src/firebase';
 import { BaseEntityConverter } from 'src/modules/BaseEntity';
+import {
+  IVoteObject, IVoter, IVoteToken, VoteToken,
+} from '~/shared/core';
 
 export const VoteTokenConverter = {
   toEntity(snapshot: QueryDocumentSnapshot<IVoteToken>): VoteToken {

@@ -47,12 +47,12 @@ import { inject, Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Dialog } from 'quasar';
 import { useAsyncState } from '@vueuse/core';
-import { VotingEvent } from '@evote/core';
 import DialogEnterVote from 'src/components/DialogEnterVote.vue';
 import { useUser } from 'src/use/useUser';
 import { useAuthModule } from 'src/modules/Auth';
-import { promiseHandler } from 'src/utils/ui';
 import { getVotingEventImage } from 'src/modules/VotingEvent';
+import { promiseHandler } from 'src/utils/ui';
+import { VotingEvent } from '~/shared/core';
 
 const voting = inject<Ref<VotingEvent>>('VotingEvent')!;
 const router = useRouter();

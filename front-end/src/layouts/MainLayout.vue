@@ -54,8 +54,8 @@
 <script lang="ts" setup>
 import { reactive, computed } from 'vue';
 import { useUser } from 'src/use/useUser';
-import { SidebarNavItem } from 'src/types/ui';
 import { useAuthModule } from 'src/modules/Auth';
+import { SidebarNavItem } from 'src/types/ui';
 
 const user = useUser();
 const { login, logout } = useAuthModule();

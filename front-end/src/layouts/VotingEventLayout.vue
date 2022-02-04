@@ -99,12 +99,12 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAsyncState, whenever } from '@vueuse/core';
-import { VotingEvent } from '@evote/core';
+import { useUser } from 'src/use/useUser';
+import { useUserPrivilege } from 'src/use/useUserPrivilege';
 import { useAuthModule } from 'src/modules/Auth';
 import { getVotingEventByUrl } from 'src/modules/VotingEvent';
-import { useUser } from 'src/use/useUser';
 import { SidebarNavItem } from 'src/types/ui';
-import { useUserPrivilege } from 'src/use/useUserPrivilege';
+import { VotingEvent } from '~/shared/core';
 
 const { login, logout } = useAuthModule();
 const user = useUser();

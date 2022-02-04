@@ -1,10 +1,10 @@
 import {
   collection, CollectionReference, doc, getDoc, query, QueryDocumentSnapshot, writeBatch, where, getDocs, QuerySnapshot,
 } from 'firebase/firestore';
-import { Voter } from '@evote/core';
 import { getDb } from 'src/firebase';
 import { BaseEntityConverter } from 'src/modules/BaseEntity';
 import { collectionName as c, votingEventInfoKey } from '~/shared/firestoreReferences';
+import { Voter } from '~/shared/core';
 import { arrayChunks } from '~/shared/utils/array';
 
 const FIREBASE_WRITE_LIMIT = 500;

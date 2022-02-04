@@ -1,9 +1,9 @@
 import {
   doc, getDoc, QueryDocumentSnapshot,
 } from 'firebase/firestore';
-import { IUserData, UserData } from '@evote/core';
 import { getAuth, getDb } from 'src/firebase';
 import { BaseEntityConverter } from 'src/modules/BaseEntity';
+import { IUserData, UserData } from '~/shared/core';
 import { collectionName } from '~/shared/firestoreReferences';
 
 export const UserDataConverter = {

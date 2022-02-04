@@ -83,13 +83,6 @@ module.exports = configure((ctx) => ({
       chain.plugin('node-polyfill')
         .use(require('node-polyfill-webpack-plugin'));
     },
-    extendWebpack(cfg) {
-      // cfg.resolve.fallback = {
-      //   ...cfg.resolve.fallback,
-      //   buffer: require.resolve('buffer'),
-      //   stream: require.resolve('stream-browserify'),
-      // };
-    },
   },
 
   // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
