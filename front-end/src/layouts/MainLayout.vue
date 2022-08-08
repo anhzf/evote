@@ -73,10 +73,10 @@ const userNavItems = Object.freeze<SidebarNavItem[]>([
   {
     label: 'Acara Voting Saya',
     icon: 'ballot',
-    to: { name: 'VotingEvents' },
+    to: { name: 'VotingEventList' },
   },
   {
-    label: 'Akun saya',
+    label: 'Akun Saya',
     icon: 'settings',
     to: { name: 'AccountSettings' },
   },

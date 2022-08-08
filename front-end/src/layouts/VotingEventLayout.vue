@@ -58,7 +58,7 @@
           flat
           size="sm"
           color="secondary"
-          :to="{ name: 'VotingEvents' }"
+          :to="{ name: 'VotingEventList' }"
         />
       </div>
     </q-drawer>

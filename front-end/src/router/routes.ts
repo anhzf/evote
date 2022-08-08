@@ -12,8 +12,13 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'events',
-        name: 'VotingEvents',
+        name: 'VotingEventList',
         component: () => import('pages/VotingEventList.vue'),
+      },
+      {
+        path: 'events/create',
+        name: 'VotingEventCreate',
+        component: () => import('pages/VotingEventCreate.vue'),
       },
       {
         path: 'settings',

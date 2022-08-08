@@ -2,7 +2,7 @@
   "name": "@evote/functions",
   "scripts": {
     "lint": "eslint --ext .js,.ts --fix .",
-    "build": "tsc",
+    "build": "tsc --noEmit && esbuild src/index.ts --outfile=dist/index.js --bundle --platform=node --minify --external:firebase-admin --external:firebase-functions",
     "dev": "tsc -w",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
@@ -13,8 +13,9 @@
   "engines": {
     "node": "16"
   },
-  "main": "lib/functions/src/index.js",
+  "main": "dist/index.js",
   "dependencies": {
+    "esbuild": "^0.14.18",
     "firebase-admin": "^10.0.1",
     "firebase-functions": "^3.16.0",
     "nanoid": "^3.2.0"

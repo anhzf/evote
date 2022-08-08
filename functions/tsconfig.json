@@ -1,16 +1,23 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "target": "ES2017",
+    // "rootDir": "./src",
     "outDir": "lib",
+    // "composite": true,
     "sourceMap": true,
     "strict": true,
-    "target": "ES2017",
     "skipLibCheck": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
   },
   "compileOnSave": true,
   "include": [
-    "src"
-  ]
+    "./src/**/*.ts",
+  ],
+  // "references": [
+  //   {
+  //     "path": "../core/tsconfig.json",
+  //   }
+  // ]
 }

@@ -2,10 +2,10 @@ import * as functions from "firebase-functions";
 import {initializeApp} from "firebase-admin/app";
 import {getAuth as fbGetAuth} from "firebase-admin/auth";
 import {FieldPath, FieldValue, getFirestore} from "firebase-admin/firestore";
-// import {IVoteObject, IVoteToken, IVotingEvent, UserData, VoteToken, VotingEvent} from "@evote/core/dist/cjs";
-import {IVoteObject, IVoter, IVoteToken, IVotingEvent, UserData, VoteToken, VotingEvent} from "../../shared/core";
+import {IUserPrivilege, IVoteObject, IVoter, IVoteToken, IVotingEvent, UserData, UserPrivilege, VoteToken, VotingEvent} from "@evote/core";
 import {collectionName as cn, votingEventInfoKey} from "../../shared/firestoreReferences";
 import {singleton} from "./utils/function";
+import {saveEntity} from "./utils/firestore";
 
 initializeApp();
 
@@ -35,16 +35,26 @@ export const onVotingEventWriteVoter = functions.firestore
     .document(`${cn.VotingEvent}/{votingEventId}/${cn.Voter}/{voterId}`)
     .onWrite(async (change, context) => {
       const votingEventId = context.params.votingEventId;
-      const votingEventInfoVoterCacheDocRef = getDb().doc(`${cn.VotingEvent}/${votingEventId}/Info/${votingEventInfoKey.voterMeta}`);
+      const votingEventInfoVoterMetaDocRef = getDb().doc(`${cn.VotingEvent}/${votingEventId}/Info/${votingEventInfoKey.voterMeta}`);
 
       if (!change.before.exists) {
         // New document Created : add one to count
-        votingEventInfoVoterCacheDocRef.update({count: FieldValue.increment(1)});
+        votingEventInfoVoterMetaDocRef.update({count: FieldValue.increment(1)});
+
+        // Assign user role as owner in voting event privileges
+        const user = context.auth!;
+        const userPrivilege = new UserPrivilege().fill({
+          role: "OWNER",
+        });
+        const userPrivilegeDocRef = getDb()
+            .doc(`${cn.VotingEvent}/${votingEventId}/${cn.UserPrivilege}/${user.uid}`) as FirebaseFirestore.DocumentReference<IUserPrivilege>;
+
+        await saveEntity(userPrivilege, userPrivilegeDocRef);
       } else if (change.before.exists && change.after.exists) {
         // Updating existing document : Do nothing
       } else if (!change.after.exists) {
         // Deleting document : subtract one from count
-        votingEventInfoVoterCacheDocRef.update({count: FieldValue.increment(-1)});
+        votingEventInfoVoterMetaDocRef.update({count: FieldValue.increment(-1)});
       }
     });
 
