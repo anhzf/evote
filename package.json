@@ -1,25 +1,24 @@
 {
-  "name": "evote",
-  "version": "1.0.0",
+  "name": "@anhzf/evote-monorepo",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "emulator:start": "firebase emulators:start --import firebase-emulator --export-on-exit",
-    "dev": "node dev.js",
+    "start:emulator": "firebase emulators:start --import firebase-emulator --export-on-exit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "workspaces": [
-    "front-end",
-    "functions",
-    "core"
-  ],
   "devDependencies": {
     "concurrently": "^7.0.0",
     "dotenv": "^12.0.3",
     "typescript": "^4.5.4"
-  }
+  },
+  "workspaces": [
+    "./app",
+    "./functions",
+    "./packages/*"
+  ]
 }

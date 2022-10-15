@@ -1,0 +1,31 @@
+{
+  "name": "@anhzf/evote-shared",
+  "version": "0.0.1",
+  "description": "",
+  "exports": {
+    "./models": "./dist/models/index.js",
+    "./utils": "./dist/utils/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "pnpm build -w --incremental --preserveWatchOutput",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anhzf/evote.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anhzf/evote/issues"
+  },
+  "homepage": "https://github.com/anhzf/evote#readme",
+  "dependencies": {
+    "nanoid": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  }
+}

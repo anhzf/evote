@@ -1,0 +1,33 @@
+{
+  "extensions": {
+    "unwantedRecommendations": [
+      "octref.vetur",
+    ],
+  },
+  "folders": [
+    {
+      "path": "./app",
+    },
+    {
+      "path": "./functions",
+    },
+    {
+      "path": ".",
+      "name": "$root"
+    },
+  ],
+  "settings": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "conventionalCommits.scopes": [
+      "core",
+      "fe",
+      "fns",
+      "fe,fns"
+    ],
+    "typescript.tsdk": "root\\node_modules\\typescript\\lib",
+    "unocss.root": "app",
+    "cSpell.words": [
+      "evote"
+    ],
+  }
+}

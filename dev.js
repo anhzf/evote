@@ -5,26 +5,22 @@ dotenv.config()
 
 concurrently([
   {
-    name: 'core:esm',
-    command: 'npm run -w core dev',
+    name: 'shared',
+    command: 'pnpm -C packages/shared dev',
   },
-  {
-    name: 'core:cjs',
-    command: 'npm run -w core dev:cjs',
-  },
-  {
-    name: 'fe',
-    command: 'npm run -w front-end dev',
-  },
-  {
+  process.argv.includes('--emulator') ? {
     name: 'emulator',
-    command: 'npm run emulator:start',
+    command: 'pnpm start:emulator',
+  } : undefined,
+  {
+    name: 'app',
+    command: 'pnpm -C app dev',
   },
   {
     name: 'functions',
-    command: 'npm run -w functions dev',
+    command: 'pnpm -C functions dev',
   }
-], {
+].filter(Boolean), {
   killOthers: ['failure', 'success'],
 })
-  .result.finally(() => {})
+  .result.finally(() => { })
