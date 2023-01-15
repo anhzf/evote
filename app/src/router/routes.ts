@@ -3,8 +3,39 @@ import { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
+    name: 'Home',
+    component: () => import('pages/IndexPage.vue'),
+  },
+  {
+    path: '/:votingEventName',
+    component: () => import('layouts/VotingEventLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'VotingEvent',
+        component: () => import('pages/voting-event/HomeVotingEventPage.vue'),
+      },
+      {
+        path: 'vote',
+        name: 'VotingEvent-Vote',
+        component: () => import('pages/voting-event/VoteVotingEventPage.vue'),
+      },
+      {
+        path: 'results',
+        name: 'VotingEvent-Results',
+        component: () => import('pages/voting-event/ResultsVotingEventPage.vue'),
+      },
+      {
+        path: 'voter',
+        name: 'VotingEvent-Voter',
+        component: () => import('pages/voting-event/VoterVotingEventPage.vue'),
+      },
+      {
+        path: 'settings',
+        name: 'VotingEvent-Settings',
+        component: () => import('pages/voting-event/SettingsVotingEvent/IndexPage.vue'),
+      },
+    ],
   },
 
   // Always leave this as last one,

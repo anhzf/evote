@@ -9,10 +9,7 @@ export interface GetDocsByPathsPayload {
 export type GetDocsByPathsResponse<T = DocumentData> = T[];
 
 export default async <T = DocumentData>(paths: string[] = []) => {
-  const fn = httpsCallable<
-    GetDocsByPathsPayload,
-    GetDocsByPathsResponse<T>
-  >(getFns(), 'getDocumentsByFullPath');
+  const fn = httpsCallable<GetDocsByPathsPayload, GetDocsByPathsResponse<T>>(getFns(), 'getDocumentsByFullPath');
   const { data } = await fn({ paths });
   return data;
 };

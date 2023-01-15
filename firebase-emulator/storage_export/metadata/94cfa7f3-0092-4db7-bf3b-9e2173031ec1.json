@@ -1,0 +1,19 @@
+{
+  "name": "VotingEvent/gtGbHWcGNGWw3tNi1Asb/VoteObject/IdVyFBHuhXLokHH46t7c_desc",
+  "bucket": "default-bucket",
+  "metageneration": 1,
+  "generation": 1642635473334,
+  "contentType": "application/octet-stream",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "contentEncoding": "identity",
+  "downloadTokens": [
+    "b690a604-a1aa-4aa6-bced-fa1796574e79"
+  ],
+  "etag": "someETag",
+  "timeCreated": "2022-01-19T23:37:53.333Z",
+  "updated": "2022-01-19T23:37:53.334Z",
+  "size": 72,
+  "md5Hash": "KQMp/h81wTdO6RCu2Vne9Q==",
+  "crc32c": "2005481624"
+}

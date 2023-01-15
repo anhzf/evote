@@ -1,7 +1,8 @@
 import type { FirebaseOptions } from 'firebase/app';
 import firebaseJson from '~/firebase.json';
 
-export default {
+export default Object.freeze({
+  publicUrl: process.env.PUBLIC_URL || window.location.origin,
   firebase: {
     config: JSON.parse(process.env.FIREBASE_CONFIG) as FirebaseOptions,
     useEmulator: process.env.DEV,
@@ -13,4 +14,4 @@ export default {
       storage: firebaseJson.emulators.storage.port,
     },
   },
-};
+});

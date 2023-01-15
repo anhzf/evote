@@ -1,32 +1,48 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <q-form @submit="onSubmit">
-      <q-input v-model="token" />
-      <q-btn label="OK" type="submit" />
-    </q-form>
+  <q-layout view="hHh LpR fff">
+    <q-header
+      elevated
+      class="bg-primary text-white"
+    >
+      <q-toolbar>
+        <q-toolbar-title>
+          <q-btn
+            flat
+            no-caps
+            :to="{name: 'Home'}"
+          >
+            <q-avatar icon="how_to_vote" />
+            <span class="text-lg ml-2">Evote App</span>
+          </q-btn>
+        </q-toolbar-title>
 
-    <q-btn label="with G" @click="login" />
-  </q-page>
+        <div>
+          <q-btn
+            label="anhzf.dev"
+            href="https://anhzf.dev"
+            target="_blank"
+            flat
+            icon-right="open_in_new"
+          />
+        </div>
+      </q-toolbar>
+    </q-header>
+
+    <q-page-container>
+      <q-page
+        padding
+        class="columns"
+      >
+        <section>
+          <p>Hai👋, Selamat Datang di</p>
+          <h1 class="m-0">
+            <span>Aplikasi Sistem Pemungutan Suara Online</span>
+          </h1>
+        </section>
+      </q-page>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script setup lang="ts">
-import auth from 'actions/auth';
-import { getAuth } from 'src/firebase';
-import { onMounted, ref } from 'vue';
-
-const token = ref('');
-const onSubmit = () => {
-  auth.loginVoteToken({ votingEventId: 'gtGbHWcGNGWw3tNi1Asb', voteToken: token.value });
-};
-const login = () => {
-  auth.login();
-};
-
-onMounted(() => {
-  getAuth().onAuthStateChanged((user) => {
-    if (user) {
-      console.log('user', user);
-    }
-  });
-});
 </script>

@@ -20,12 +20,11 @@
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "conventionalCommits.scopes": [
       "core",
-      "fe",
+      "web",
       "fns",
-      "fe,fns"
+      "web,fns"
     ],
     "typescript.tsdk": "root\\node_modules\\typescript\\lib",
-    "unocss.root": "app",
     "cSpell.words": [
       "evote"
     ],

@@ -15,7 +15,7 @@ const { configure } = require('quasar/wrappers');
 const path = require('path');
 
 module.exports = configure((/* ctx */) => ({
-  eslint: {
+  eslint: undefined && {
     fix: true,
     // include = [],
     // exclude = [],
@@ -32,7 +32,7 @@ module.exports = configure((/* ctx */) => ({
   // https://v2.quasar.dev/quasar-cli-vite/boot-files
   boot: [
     'i18n',
-
+    'simple-plugins',
   ],
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
@@ -53,6 +53,7 @@ module.exports = configure((/* ctx */) => ({
 
     'roboto-font', // optional, you are not bound to it
     'material-icons', // optional, you are not bound to it
+    'mdi-v7',
   ],
 
   // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build

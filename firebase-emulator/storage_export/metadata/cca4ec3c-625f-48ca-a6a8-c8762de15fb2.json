@@ -1,0 +1,19 @@
+{
+  "name": "VotingEvent/gtGbHWcGNGWw3tNi1Asb/VoteObject/GM49BtX4yGqSwrNYf2Ht_img",
+  "bucket": "default-bucket",
+  "metageneration": 1,
+  "generation": 1642634262363,
+  "contentType": "application/octet-stream",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "contentEncoding": "identity",
+  "downloadTokens": [
+    "3827a0aa-266a-4af6-9b6e-76300bff8dbe"
+  ],
+  "etag": "someETag",
+  "timeCreated": "2022-01-19T23:17:42.362Z",
+  "updated": "2022-01-19T23:17:42.362Z",
+  "size": 87976,
+  "md5Hash": "1ylhK7ZJJVRk8hvJ8PbiFg==",
+  "crc32c": "3770453990"
+}

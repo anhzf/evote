@@ -1,0 +1,19 @@
+{
+  "name": "VotingEvent/gtGbHWcGNGWw3tNi1Asb/VotingObject/IdVyFBHuhXLokHH46t7c_desc",
+  "bucket": "anh-election-app.appspot.com",
+  "metageneration": 1,
+  "generation": 1642639927723,
+  "contentType": "application/octet-stream",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "contentEncoding": "identity",
+  "downloadTokens": [
+    "c9499475-2810-4e2f-ad96-099ddb5bab4f"
+  ],
+  "etag": "someETag",
+  "timeCreated": "2022-01-20T00:52:07.722Z",
+  "updated": "2022-01-20T00:52:07.722Z",
+  "size": 72,
+  "md5Hash": "KQMp/h81wTdO6RCu2Vne9Q==",
+  "crc32c": "2005481624"
+}
