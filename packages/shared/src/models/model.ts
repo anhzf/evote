@@ -1,9 +1,9 @@
 import { nanoid } from 'nanoid';
 
 export interface Model {
-  id: string;
+  uid: string;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
   deletedAt?: Date;
 }
 
@@ -14,7 +14,7 @@ export interface SoftDelete {
 interface RequiredAttributes extends Pick<Model, never> { }
 
 const create = <T extends RequiredAttributes>(data?: T): Model & T => Object.assign({
-  id: nanoid(),
+  uid: nanoid(),
   createdAt: new Date(),
   updatedAt: new Date(),
 }, data);

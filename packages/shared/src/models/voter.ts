@@ -11,6 +11,6 @@ const create = <T extends RequiredAttributes>(data?: T): Voter & T => modelOpera
   meta: {},
 }, data));
 
-export const voteTokenOperations = {
+export const voterOperations = {
   create,
 };
