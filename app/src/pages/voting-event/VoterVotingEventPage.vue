@@ -68,8 +68,6 @@ const fetchVoterList = async (start: number, end: number, filter: string, sortBy
   const snapshot = await getDocs(
     query(
       collection(getDb(), 'VotingEvent', votingEvent.value.uid, 'Voter'),
-      // where('meta.NAMA', '>=', filter),
-      // where('meta.KATEGORI', '>=', filter),
       where(sortBy, '>=', filter),
       where(sortBy, '<=', `${filter}\uf8ff`),
       orderBy(sortBy, isDesc ? 'desc' : 'asc'),

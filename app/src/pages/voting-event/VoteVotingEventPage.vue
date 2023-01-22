@@ -1,37 +1,25 @@
 <script lang="ts" setup>
+import { onMounted } from 'vue';
+import { Dialog, Notify } from 'quasar';
+import { useVotableList } from 'src/composables/use-votable';
+import CardCandidate from 'components/CardCandidate.vue';
 import { Votable } from '@anhzf/evote-shared/models';
-import { onMounted, ref } from 'vue';
-import { Notify, uid } from 'quasar';
 
-const votables = ref<Votable[]>([
-  {
-    uid: uid(),
-    title: 'M. Abdul Aziz',
-    subtitle: 'VIII A',
-    thumbnailSrc: '/assets/mockup/calon1.png',
-    createdAt: new Date(),
-  },
-  {
-    uid: uid(),
-    title: 'M. Abdul Aziz',
-    subtitle: 'VIII A',
-    thumbnailSrc: '/assets/mockup/calon2.png',
-    createdAt: new Date(),
-  },
-  {
-    uid: uid(),
-    title: 'M. Abdul Aziz',
-    subtitle: 'VIII A',
-    thumbnailSrc: '/assets/mockup/calon3.png',
-    createdAt: new Date(),
-  },
-]);
+const votables = useVotableList();
 
-const vote = (votable: Votable) => {
-  console.log(votable);
+const onVote = (votable: Votable) => {
+  Dialog.create({
+    title: 'Konfirmasi',
+    message: `Apakah anda yakin untuk memilih "${votable.title}"?`,
+    cancel: true,
+    persistent: true,
+  })
+    .onOk(() => {
+      //
+    });
 };
 
-onMounted(() => {
+onMounted(async () => {
   Notify.create({
     message: 'Untuk memberi suara anda harus memiliki token atau login terlebih dahulu.',
     type: 'warning',
@@ -69,34 +57,29 @@ onMounted(() => {
     class="column"
   >
     <section class="w-full max-w-6xl mx-auto row items-start q-col-gutter-lg">
-      <div
-        v-for="el in votables"
-        :key="el.uid"
-        class="col-xs-12 col-sm-6 col-md-4"
-      >
-        <q-card @click="vote(el)">
-          <q-img
-            :src="el.thumbnailSrc"
-            :ratio="4/3"
+      <template v-if="votables.length">
+        <div
+          v-for="el in votables"
+          :key="el.uid"
+          class="col-xs-12 col-sm-6 col-md-4"
+        >
+          <card-candidate
+            :uid="el.uid"
+            :title="el.title"
+            :subtitle="el.subtitle"
+            :img-src="el.thumbnailSrc"
+            :desc="el.desc && JSON.parse(el.desc)"
+            @vote="onVote(el)"
           />
+        </div>
+      </template>
 
-          <q-card-section class="column">
-            <h3 class="text-h6 m-0 text-center">
-              {{ el.title }}
-            </h3>
-            <p class="text-caption m-0 text-center">
-              {{ el.subtitle }}
-            </p>
-          </q-card-section>
-
-          <q-card-actions vertical>
-            <q-btn
-              label="Pilih"
-              color="primary"
-            />
-          </q-card-actions>
-        </q-card>
-      </div>
+      <p
+        v-else
+        class="self-stretch w-full text-center"
+      >
+        Tidak ada calon yang dapat dipilih.
+      </p>
     </section>
   </q-page>
 </template>

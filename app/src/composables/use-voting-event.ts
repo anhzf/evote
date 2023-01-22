@@ -4,7 +4,7 @@ import {
 } from 'firebase/firestore';
 import { useDocs } from 'src/composables/use-firestore';
 import { getDb } from 'src/firebase';
-import { computed, Ref, watch } from 'vue';
+import { computed, inject, Ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 interface _useVotingEvent {
@@ -48,5 +48,7 @@ const useVotingEvent: _useVotingEvent = () => {
     return undefined;
   });
 };
+
+export const useInjectedVotingEvent = () => inject<Ref<VotingEvent>>('voting-event')!;
 
 export default useVotingEvent;

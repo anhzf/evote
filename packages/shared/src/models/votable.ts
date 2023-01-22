@@ -5,6 +5,7 @@ export interface Votable extends Model {
   subtitle: string;
   thumbnailSrc?: string;
   ref?: string;
+  desc?: string;
 }
 
 interface RequiredAttributes extends Pick<Votable, 'title'> { }

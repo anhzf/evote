@@ -4,8 +4,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const useEmulator = process.argv.includes('--emulator')
-
-process.env.useEmulator = useEmulator
+process.env.FIREBASE_EMULATOR = useEmulator
 
 concurrently([
   {

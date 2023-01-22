@@ -75,7 +75,8 @@ module.exports = configure((/* ctx */) => ({
     // publicPath: '/',
     // analyze: true,
     env: {
-      FIREBASE_CONFIG: process.env.FIREBASE_CONFIG,
+      FIREBASE_CONFIG: JSON.parse(process.env.FIREBASE_CONFIG),
+      FIREBASE_EMULATOR: process.env.FIREBASE_EMULATOR === 'true',
     },
     // rawDefine: {}
     // ignorePublicFolder: true,
