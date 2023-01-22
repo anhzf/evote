@@ -1,14 +1,34 @@
 <script setup lang="ts">
 import { useHead } from '@vueuse/head';
-import { Loading } from 'quasar';
+import DialogLogin from 'components/DialogLogin.vue';
+import { signOut } from 'firebase/auth';
+import { Dialog, Loading } from 'quasar';
 import useVotingEvent from 'src/composables/use-voting-event';
 import { provide, ref, watch } from 'vue';
+import { useCurrentUser, useFirebaseAuth } from 'vuefire';
 
 const votingEvent = useVotingEvent();
+const auth = useFirebaseAuth();
+const user = useCurrentUser();
+
 const rightDrawerOpen = ref(false);
 
 const toggleRightDrawer = () => {
   rightDrawerOpen.value = !rightDrawerOpen.value;
+};
+
+const showLoginDialog = () => {
+  Dialog.create({
+    component: DialogLogin,
+  });
+};
+
+const logout = async () => {
+  if (auth) {
+    await signOut(auth);
+  }
+
+  rightDrawerOpen.value = false;
 };
 
 watch(votingEvent, (v) => {
@@ -50,20 +70,23 @@ useHead({
           </q-btn>
         </q-toolbar-title>
 
-        <!-- <q-btn
+        <q-btn
+          v-if="user"
           rounded
           unelevated
           @click="toggleRightDrawer"
         >
-          <span class="mr-2">Alwan Nuha</span>
+          <span class="mr-2">{{ user.displayName }}</span>
           <q-avatar icon="account_circle" />
-        </q-btn> -->
+        </q-btn>
 
         <q-btn
+          v-else
           label="Login"
           icon-right="login"
           unelevated
           outline
+          @click="showLoginDialog"
         />
       </q-toolbar>
 
@@ -132,6 +155,7 @@ useHead({
       <q-item
         clickable
         class="text-red-6"
+        @click="logout"
       >
         <q-item-section avatar>
           <q-icon name="logout" />

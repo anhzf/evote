@@ -5,6 +5,7 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'Home',
     component: () => import('pages/IndexPage.vue'),
+    meta: { requiresAuth: false },
   },
   {
     path: '/:votingEventName',
@@ -14,11 +15,13 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'VotingEvent',
         component: () => import('pages/voting-event/HomeVotingEventPage.vue'),
+        meta: { requiresAuth: false },
       },
       {
         path: 'vote',
         name: 'VotingEvent-Vote',
         component: () => import('pages/voting-event/VoteVotingEventPage.vue'),
+        meta: { requiresAuth: false },
       },
       {
         path: 'results',

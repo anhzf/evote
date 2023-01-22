@@ -33,6 +33,8 @@ module.exports = configure((/* ctx */) => ({
   boot: [
     'i18n',
     'simple-plugins',
+    'firebase',
+    'security',
   ],
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css

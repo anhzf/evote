@@ -1,3 +1,4 @@
+import { singleton } from '@anhzf/evote-shared/utils';
 import { initializeApp } from 'firebase/app';
 import { getAnalytics as fbGetAnalytics } from 'firebase/analytics';
 import { getAuth as fbGetAuth, connectAuthEmulator } from 'firebase/auth';
@@ -5,21 +6,12 @@ import { initializeFirestore, connectFirestoreEmulator } from 'firebase/firestor
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { getStorage as fbGetStorage, connectStorageEmulator } from 'firebase/storage';
 import config from 'src/config';
-// import { singleton } from '~/shared/utils/function';
-
-const singleton = <R, A extends unknown[]>(fn: ((...args: A) => R)) => {
-  let instance: R | null = null;
-  return (...args: A) => {
-    if (instance === null) {
-      instance = fn(...args);
-    }
-    return instance;
-  };
-};
 
 const firebaseApp = initializeApp(config.firebase.config);
 
-const STORAGE_BUCKET = config.firebase.useEmulator ? 'gs://default-bucket/' : config.firebase.config.storageBucket;
+const STORAGE_BUCKET = config.firebase.useEmulator
+  ? 'gs://default-bucket/'
+  : config.firebase.config.storageBucket;
 
 const getDb = singleton(() => {
   const db = initializeFirestore(firebaseApp, {

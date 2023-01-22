@@ -1,3 +1,68 @@
+<script lang="ts" setup>
+import {
+  defineProps, defineEmits, ref, Ref, reactive, inject,
+} from 'vue';
+import { Notify, useDialogPluginComponent } from 'quasar';
+import { useAsyncState, whenever } from '@vueuse/core';
+import { parse } from 'csv-parse/browser/esm/sync';
+import { Voter, voterOperations, VotingEvent } from '@anhzf/evote-shared/models';
+
+export interface Props {
+  votingEventId: string;
+}
+
+const props = defineProps<Props>();
+defineEmits([...useDialogPluginComponent.emits]);
+
+const {
+  dialogRef, onDialogHide, onDialogOK, onDialogCancel,
+} = useDialogPluginComponent();
+
+const votingEvent = inject<Ref<VotingEvent>>('voting-event')!;
+
+const saveVoterBatch = async (voters: Voter[]) => {
+  //
+};
+
+const _ui = reactive({
+  isImportingLoading: false,
+});
+
+const uploaded = ref<File>();
+
+const parseCSV = async () => {
+  const input = await uploaded.value?.text() || '';
+
+  return parse(input, {
+    columns: true,
+    delimiter: ';',
+  }) as Record<string, unknown>[];
+};
+
+const { state: parsed, isLoading, execute } = useAsyncState(parseCSV, []);
+
+const saveImportedData = async () => {
+  _ui.isImportingLoading = true;
+
+  const voters = parsed.value.map((el) => voterOperations.create({ meta: el }));
+
+  await saveVoterBatch(voters);
+  _ui.isImportingLoading = false;
+};
+
+const onOKClick = () => {
+  saveImportedData()
+    .then(() => Notify.create({ message: `Berhasil menambahkan ${parsed.value.length} pemilih!` }))
+    .finally(onDialogOK);
+};
+
+const onCancelClick = () => {
+  onDialogCancel();
+};
+
+whenever(uploaded, () => execute());
+</script>
+
 <template>
   <q-dialog
     ref="dialogRef"
@@ -64,68 +129,3 @@
     </q-card>
   </q-dialog>
 </template>
-
-<script lang="ts" setup>
-import {
-  defineProps, defineEmits, ref, Ref, reactive, inject,
-} from 'vue';
-import { Notify, useDialogPluginComponent } from 'quasar';
-import { useAsyncState, whenever } from '@vueuse/core';
-import { parse } from 'csv-parse/browser/esm/sync';
-import { Voter, voterOperations, VotingEvent } from '@anhzf/evote-shared/models';
-
-export interface Props {
-  votingEventId: string;
-}
-
-const props = defineProps<Props>();
-defineEmits([...useDialogPluginComponent.emits]);
-
-const {
-  dialogRef, onDialogHide, onDialogOK, onDialogCancel,
-} = useDialogPluginComponent();
-
-const votingEvent = inject<Ref<VotingEvent>>('voting-event')!;
-
-const saveVoterBatch = async (voters: Voter[]) => {
-  //
-};
-
-const _ui = reactive({
-  isImportingLoading: false,
-});
-
-const uploaded = ref<File>();
-
-const parseCSV = async () => {
-  const input = await uploaded.value?.text() || '';
-
-  return parse(input, {
-    columns: true,
-    delimiter: ';',
-  }) as Record<string, unknown>[];
-};
-
-const { state: parsed, isLoading, execute } = useAsyncState(parseCSV, []);
-
-const saveImportedData = async () => {
-  _ui.isImportingLoading = true;
-
-  const voters = parsed.value.map((el) => voterOperations.create({ meta: el }));
-
-  await saveVoterBatch(voters);
-  _ui.isImportingLoading = false;
-};
-
-const onOKClick = () => {
-  saveImportedData()
-    .then(() => Notify.create({ message: `Berhasil menambahkan ${parsed.value.length} pemilih!` }))
-    .finally(onDialogOK);
-};
-
-const onCancelClick = () => {
-  onDialogCancel();
-};
-
-whenever(uploaded, () => execute());
-</script>
