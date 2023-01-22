@@ -3,15 +3,19 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
+const useEmulator = process.argv.includes('--emulator')
+
+process.env.useEmulator = useEmulator
+
 concurrently([
   {
     name: 'shared',
     command: 'pnpm -C packages/shared dev',
   },
-  process.argv.includes('--emulator') ? {
+  useEmulator && {
     name: 'emulator',
     command: 'pnpm start:emulator',
-  } : undefined,
+  },
   {
     name: 'app',
     command: 'pnpm -C app dev',

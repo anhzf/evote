@@ -6,14 +6,16 @@
   },
   "folders": [
     {
+      "path": ".",
+      "name": "🏠"
+    },
+    {
+      "name": "👉 App",
       "path": "./app",
     },
     {
+      "name": "👉 Functions",
       "path": "./functions",
-    },
-    {
-      "path": ".",
-      "name": "$root"
     },
   ],
   "settings": {
