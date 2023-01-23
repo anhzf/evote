@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { onMounted } from 'vue';
+import { Votable } from '@anhzf/evote-shared/models';
+import CardCandidate from 'components/CardCandidate.vue';
 import { Dialog, Notify } from 'quasar';
 import { useVotableList } from 'src/composables/use-votable';
-import CardCandidate from 'components/CardCandidate.vue';
-import { Votable } from '@anhzf/evote-shared/models';
+import { onMounted } from 'vue';
 
 const votables = useVotableList();
 
@@ -25,7 +25,8 @@ onMounted(async () => {
     type: 'warning',
     position: 'bottom',
     multiLine: true,
-    timeout: 0,
+    timeout: 30_000,
+    progress: true,
     actions: [
       {
         label: 'Tutup', color: 'negative', handler: () => { /*  */ },
@@ -42,7 +43,8 @@ onMounted(async () => {
     message: 'Hak suara anda masih tersedia, silakan berikan suara kepada kandidat yang tersedia dengan bijak.',
     position: 'bottom',
     multiLine: true,
-    timeout: 0,
+    timeout: 30_000,
+    progress: true,
     actions: [
       { label: 'Tutup', handler: () => { /*  */ } },
       { label: 'Berikan suara', to: { name: 'VotingEvent-Vote' } },

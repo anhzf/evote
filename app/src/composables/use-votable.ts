@@ -1,12 +1,12 @@
-import { computed, Ref, watch } from 'vue';
 import { Votable } from '@anhzf/evote-shared/models';
-import { useInjectedVotingEvent } from 'src/composables/use-voting-event';
 import {
   collection, CollectionReference, DocumentReference, QueryDocumentSnapshot, Timestamp,
 } from 'firebase/firestore';
 import { ref as refStorage } from 'firebase/storage';
-import { getDb, getStorage } from 'src/firebase';
 import { useDocs } from 'src/composables/use-firestore';
+import { useInjectedVotingEvent } from 'src/composables/use-voting-event';
+import { getDb, getStorage } from 'src/firebase';
+import { computed, Ref } from 'vue';
 
 interface _useVotableList {
   (): Ref<Votable[]>;

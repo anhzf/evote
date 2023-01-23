@@ -1,15 +1,25 @@
 <script lang="ts" setup>
-import { Voter, VotingEvent } from '@anhzf/evote-shared/models';
-import { useAsyncState } from '@vueuse/core';
+import { Voter } from '@anhzf/evote-shared/models';
 import DialogVoterCsvImporter from 'components/DialogVoterCsvImporter.vue';
 import {
-  collection, getCountFromServer, getDocs, orderBy, query, where,
+  collection, CollectionReference, getCountFromServer, getDocs, limit, orderBy, Query, query, QueryDocumentSnapshot, startAt, Timestamp, where,
 } from 'firebase/firestore';
-import { Dialog, QTableColumn, QTableProps } from 'quasar';
+import {
+  Dialog, QTable, QTableColumn, QTableProps,
+} from 'quasar';
+import { useInjectedVotingEvent } from 'src/composables/use-voting-event';
 import { getDb } from 'src/firebase';
 import {
-  computed, inject, reactive, Ref, ref,
+  computed, onMounted, reactive, ref,
 } from 'vue';
+
+interface FromSource {
+    userId?: string;
+    meta: Record<string, any>;
+    createdAt: Timestamp;
+    updatedAt?: Timestamp;
+    deletedAt?: Timestamp;
+}
 
 const prependColumns: QTableColumn<Voter>[] = [
   {
@@ -32,6 +42,44 @@ const appendColumns: QTableColumn<Voter>[] = [
   },
 ];
 
+const votingEvent = useInjectedVotingEvent();
+
+const getVoterListCount = async (q: Query = collection(getDb(), 'VotingEvent', votingEvent.value.uid, 'Voter')) => {
+  const snapshot = await getCountFromServer(q);
+  return snapshot.data().count;
+};
+
+const fromSource = (doc: QueryDocumentSnapshot<FromSource>): Voter => {
+  const data = doc.data();
+  return {
+    ...data, createdAt: data.createdAt.toDate(), updatedAt: data.updatedAt?.toDate(), deletedAt: data.deletedAt?.toDate(), uid: doc.id,
+  };
+};
+
+const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = false) => query(
+    collection(getDb(), 'VotingEvent', votingEvent.value.uid, 'Voter') as CollectionReference<FromSource>,
+    ...(search ? [
+      where(sortBy, '>=', search),
+      where(sortBy, '<=', `${search}\uf8ff`),
+    ] : []),
+    orderBy(sortBy, descending ? 'desc' : 'asc'),
+    startAt(start),
+);
+
+const selected = ref<Voter[]>([]);
+const filter = ref('');
+const table = ref<QTable>();
+const pagination = ref<NonNullable<QTableProps['pagination']>>({
+  sortBy: 'meta.NAMA',
+  descending: false,
+  page: 1,
+  rowsPerPage: 10,
+});
+const _ui = reactive({
+  isLoading: false,
+});
+
+const rows = ref<Voter[]>([]);
 const columns = computed<QTableColumn<Voter>[]>(() => [
   ...prependColumns,
   {
@@ -57,64 +105,42 @@ const columns = computed<QTableColumn<Voter>[]>(() => [
   ...appendColumns,
 ]);
 
-const votingEvent = inject<Ref<VotingEvent>>('voting-event')!;
-
-const getVoterListCount = async () => {
-  const snapshot = await getCountFromServer(collection(getDb(), 'VotingEvent', votingEvent.value.uid, 'Voter'));
-  return snapshot.data().count;
-};
-
-const fetchVoterList = async (start: number, end: number, filter: string, sortBy = 'meta.NAMA', isDesc = false) => {
-  const snapshot = await getDocs(
-    query(
-      collection(getDb(), 'VotingEvent', votingEvent.value.uid, 'Voter'),
-      where(sortBy, '>=', filter),
-      where(sortBy, '<=', `${filter}\uf8ff`),
-      orderBy(sortBy, isDesc ? 'desc' : 'asc'),
-    ),
-  );
-  return snapshot.docs.map((doc) => ({ ...doc.data(), uid: doc.id } as Voter));
-};
-
-const selected = ref<Voter[]>([]);
-const filter = ref('');
-const _ui = reactive({
-  isLoading: false,
-});
-
-const { state: pagination, isLoading: isPaginationLoading } = useAsyncState<QTableProps['pagination']>(
-  async () => ({
-    sortBy: 'meta.NAMA',
-    descending: false,
-    page: 1,
-    rowsPerPage: 0,
-    rowsNumber: await getVoterListCount(),
-  }),
-  undefined,
-);
-
-const voterList = ref<Voter[]>([]);
-
-const onTableRequest: QTableProps['onRequest'] = (async (reqProps) => {
+const onTableRequest: QTableProps['onRequest'] = async (req) => {
   _ui.isLoading = true;
 
-  const start = (reqProps.pagination.page - 1) * reqProps.pagination.rowsPerPage;
-  const end = reqProps.pagination.page * reqProps.pagination.rowsPerPage;
-  const terms = String(reqProps.filter);
-  const isDesc = reqProps.pagination.descending;
-  const { sortBy } = reqProps.pagination;
+  const {
+    pagination: {
+      descending, page, rowsPerPage, sortBy,
+    },
+    filter: search,
+  } = req;
 
-  voterList.value = await fetchVoterList(start, end, terms, sortBy, isDesc);
+  const q = buildQuery(
+    (page - 1) * rowsPerPage,
+    search,
+    sortBy,
+    descending,
+  );
 
-  if (pagination.value) {
-    pagination.value = {
-      ...reqProps.pagination,
-      rowsNumber: voterList.value.length || await getVoterListCount(),
-    };
-  }
+  const [snapshot, count] = await Promise.all([
+    getDocs(rowsPerPage ? query(q, limit(rowsPerPage)) : q),
+    getVoterListCount(q),
+  ]);
+
+  const voters = snapshot.docs.map(fromSource);
+
+  rows.value.splice(0, rows.value.length, ...voters);
+
+  pagination.value = {
+    page,
+    rowsPerPage,
+    sortBy,
+    descending,
+    rowsNumber: count,
+  };
 
   _ui.isLoading = false;
-});
+};
 
 const onImportCSVClick = () => {
   Dialog.create({
@@ -122,6 +148,10 @@ const onImportCSVClick = () => {
     componentProps: { votingEventId: votingEvent.value.uid },
   });
 };
+
+onMounted(async () => {
+  table.value?.requestServerInteraction();
+});
 </script>
 
 <template>
@@ -130,17 +160,18 @@ const onImportCSVClick = () => {
     class="column"
   >
     <q-table
+      ref="table"
       v-model:selected="selected"
       v-model:pagination="pagination"
       title="Daftar pemilih"
       :columns="columns"
-      :rows="voterList"
+      :rows="rows"
       row-key="id"
       selection="multiple"
       :filter="filter"
-      :loading="isPaginationLoading || _ui.isLoading"
+      :loading="_ui.isLoading"
+      :rows-per-page-options="[10, 25, 50]"
       class="flex-grow max-h-80vh"
-      :no-data-label="`Tidak dapat menampilkan daftar untuk sementara. Terdapat ${pagination?.rowsNumber} pemilih yang terdaftar dalam database`"
       @request="onTableRequest"
     >
       <template #top-right>
