@@ -6,6 +6,7 @@
     <q-img
       src="/assets/mockup/voting-event-banner.jpg"
       :ratio="16/9"
+      fit="scale-down"
     />
 
     <section class="column">

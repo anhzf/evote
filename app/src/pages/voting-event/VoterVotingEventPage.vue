@@ -4,6 +4,7 @@ import DialogVoterCsvImporter from 'components/DialogVoterCsvImporter.vue';
 import {
   collection, CollectionReference, getCountFromServer, getDocs, limit, orderBy, Query, query, QueryDocumentSnapshot, startAt, Timestamp, where,
 } from 'firebase/firestore';
+import TokenViewer from 'pages/voting-event/VoterVotingEvent/TokenViewer.vue';
 import {
   Dialog, QTable, QTableColumn, QTableProps,
 } from 'quasar';
@@ -58,6 +59,7 @@ const fromSource = (doc: QueryDocumentSnapshot<FromSource>): Voter => {
 
 const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = false) => query(
     collection(getDb(), 'VotingEvent', votingEvent.value.uid, 'Voter') as CollectionReference<FromSource>,
+    // Remove where filter if there's no search input
     ...(search ? [
       where(sortBy, '>=', search),
       where(sortBy, '<=', `${search}\uf8ff`),
@@ -105,6 +107,9 @@ const columns = computed<QTableColumn<Voter>[]>(() => [
   ...appendColumns,
 ]);
 
+/**
+ * TODO: Refactor to composables
+ */
 const onTableRequest: QTableProps['onRequest'] = async (req) => {
   _ui.isLoading = true;
 
@@ -157,7 +162,7 @@ onMounted(async () => {
 <template>
   <q-page
     padding
-    class="column"
+    class="column justify-center items-center"
   >
     <q-table
       ref="table"
@@ -171,7 +176,7 @@ onMounted(async () => {
       :filter="filter"
       :loading="_ui.isLoading"
       :rows-per-page-options="[10, 25, 50]"
-      class="flex-grow max-h-80vh"
+      class="flex-grow max-h-80vh w-full max-w-7xl"
       @request="onTableRequest"
     >
       <template #top-right>
@@ -193,11 +198,11 @@ onMounted(async () => {
             @click="onImportCSVClick"
           />
 
-          <!-- <q-btn
+          <q-btn
             label="Tambah"
             unelevated
             color="positive"
-          />-->
+          />
 
           <q-btn
             v-if="selected.length"
@@ -211,10 +216,7 @@ onMounted(async () => {
       <template #body-cell-token="props">
         <q-td :props="props">
           <div class="row justify-end q-gutter-x-sm">
-            <!-- <VoterListTokenView
-              :voting-event-id="votingEvent.uid"
-              :voter-id="props.value"
-            /> -->
+            <TokenViewer :voter-id="props.value" />
           </div>
         </q-td>
       </template>
