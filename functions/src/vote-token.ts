@@ -7,6 +7,9 @@ import * as fromSrc from './lib/models';
 import {getDb} from './utils/firebase';
 import {dbRef} from './utils/firestore';
 
+/**
+ * TODO: Prevent same VoteToken
+ */
 export const get = functions.https.onCall(async (data, context) => {
   // TODO: Check if user is admin
   if (!context.auth) {
@@ -26,11 +29,7 @@ export const get = functions.https.onCall(async (data, context) => {
     const query = collectionRef.where('voter', '==', voterRef);
     const snapshots = await t.get(query);
 
-    interface TokenGroups {
-      used: QueryDocumentSnapshot<fromSrc.VoteToken>[];
-      available: QueryDocumentSnapshot<fromSrc.VoteToken>[];
-      expired: QueryDocumentSnapshot<fromSrc.VoteToken>[];
-    }
+    type TokenGroups = Record<'used'| 'available'| 'expired', QueryDocumentSnapshot<fromSrc.VoteToken>[]>
 
     // Group tokens by availability
     const tokens = snapshots.docs.reduce<TokenGroups>((acc, doc) => {
@@ -51,12 +50,6 @@ export const get = functions.https.onCall(async (data, context) => {
 
       return acc;
     }, {available: [], used: [], expired: []});
-
-    functions.logger.debug(
-        tokens.available.map((doc) => voteTokenConverter.fromSrc(doc.data())),
-        tokens.used.map((doc) => voteTokenConverter.fromSrc(doc.data())),
-        tokens.expired.map((doc) => voteTokenConverter.fromSrc(doc.data()))
-    );
 
     // Delete vote tokens if expired
     tokens.expired.forEach((doc) => t.delete(doc.ref, {exists: true}));

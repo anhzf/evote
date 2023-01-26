@@ -150,8 +150,10 @@ const onTableRequest: QTableProps['onRequest'] = async (req) => {
 const onImportCSVClick = () => {
   Dialog.create({
     component: DialogVoterCsvImporter,
-    componentProps: { votingEventId: votingEvent.value!.uid },
-  });
+  })
+    .onOk(() => {
+      table.value?.requestServerInteraction();
+    });
 };
 
 onMounted(async () => {

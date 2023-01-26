@@ -1,27 +1,42 @@
 <script lang="ts" setup>
-import {
-  defineProps, defineEmits, ref, Ref, reactive, inject,
-} from 'vue';
-import { Notify, useDialogPluginComponent } from 'quasar';
+import { Voter, voterOperations } from '@anhzf/evote-shared/models';
+import { arrayChunks } from '@anhzf/evote-shared/utils';
 import { useAsyncState, whenever } from '@vueuse/core';
 import { parse } from 'csv-parse/browser/esm/sync';
-import { Voter, voterOperations, VotingEvent } from '@anhzf/evote-shared/models';
+import {
+  collection, CollectionReference, doc, writeBatch,
+} from 'firebase/firestore';
+import { Notify, useDialogPluginComponent } from 'quasar';
+import useVotingEvent from 'src/composables/use-voting-event';
+import { getDb } from 'src/firebase';
+import { defineEmits, reactive, ref } from 'vue';
 
-export interface Props {
-  votingEventId: string;
-}
+const FIREBASE_WRITE_LIMIT = 500;
 
-const props = defineProps<Props>();
 defineEmits([...useDialogPluginComponent.emits]);
 
 const {
   dialogRef, onDialogHide, onDialogOK, onDialogCancel,
 } = useDialogPluginComponent();
 
-const votingEvent = inject<Ref<VotingEvent>>('voting-event')!;
+const votingEvent = useVotingEvent();
 
 const saveVoterBatch = async (voters: Voter[]) => {
-  //
+  const db = getDb();
+  const chunks = arrayChunks(voters, FIREBASE_WRITE_LIMIT);
+  const voterCollectionRef = collection(db, 'VotingEvent', votingEvent.value!.uid, 'Voter') as CollectionReference<Voter>;
+
+  return Promise.all(chunks.map((chunk) => {
+    const batch = writeBatch(db);
+
+    chunk.forEach((v) => {
+      const { uid, ...data } = v;
+      const docRef = uid ? doc(voterCollectionRef, uid) : doc(voterCollectionRef);
+      batch.set(docRef, data);
+    });
+
+    return batch.commit();
+  }));
 };
 
 const _ui = reactive({
@@ -45,7 +60,6 @@ const saveImportedData = async () => {
   _ui.isImportingLoading = true;
 
   const voters = parsed.value.map((el) => voterOperations.create({ meta: el }));
-
   await saveVoterBatch(voters);
   _ui.isImportingLoading = false;
 };
