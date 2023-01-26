@@ -5,20 +5,16 @@ dotenv.config()
 
 concurrently([
   {
-    name: 'core:esm',
-    command: 'npm run -w core build',
+    name: 'shared',
+    command: 'pnpm -C packages/shared build',
   },
   {
-    name: 'core:cjs',
-    command: 'npm run -w core build:cjs',
-  },
-  {
-    name: 'fe',
-    command: 'npm run -w front-end build',
+    name: 'app',
+    command: 'pnpm -C app build',
   },
   {
     name: 'functions',
-    command: 'npm run -w functions build',
+    command: 'pnpm -C functions build',
   }
 ])
-  .result.finally(() => {})
+  .result.finally(() => { })
