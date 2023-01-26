@@ -36,6 +36,7 @@ const logout = async () => {
   }
 
   stopLoading();
+  router.push({ name: 'VotingEvent' });
   rightDrawerOpen.value = false;
 };
 

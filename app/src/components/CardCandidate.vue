@@ -85,9 +85,7 @@ watchOnce(() => showDialog.value === true, () => {
       <q-card-section class="column no-wrap scroll grow">
         <q-img
           :src="imgUrl"
-          :ratio="4/3"
-          width="100%"
-          class="flex-shrink-0 self-center max-w-screen-xs"
+          class="flex-shrink-0 self-center w-full max-w-screen-xs"
         />
 
         <div

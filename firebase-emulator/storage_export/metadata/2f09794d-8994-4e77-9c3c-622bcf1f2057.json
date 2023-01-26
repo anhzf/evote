@@ -2,18 +2,18 @@
   "name": "VotingEvent/gtGbHWcGNGWw3tNi1Asb/Votable/IdVyFBHuhXLokHH46t7c",
   "bucket": "default-bucket",
   "metageneration": 1,
-  "generation": 1674405260065,
+  "generation": 1674707039003,
   "contentType": "application/octet-stream",
   "storageClass": "STANDARD",
   "contentDisposition": "inline",
   "downloadTokens": [
-    "b27e98ed-1a16-446a-a52f-d9e8bdd4cf5a"
+    "02a36b03-b573-4d4a-91d4-56911684fb4b"
   ],
-  "etag": "kBDUJ3zMUKGscys/d6CNHEiwmM8",
+  "etag": "EBAJ23pfUK2zEpg7j37JR/O4lWk",
   "customMetadata": {},
-  "timeCreated": "2023-01-22T16:34:20.066Z",
-  "updated": "2023-01-22T16:34:20.066Z",
-  "size": 483481,
-  "md5Hash": "/Ws5HgF2VrHHalzX7nVFCw==",
-  "crc32c": "3289164068"
+  "timeCreated": "2023-01-26T04:23:59.003Z",
+  "updated": "2023-01-26T04:23:59.003Z",
+  "size": 210605,
+  "md5Hash": "cbdKl8fNhCjYvkDFAKUf6g==",
+  "crc32c": "2929619957"
 }

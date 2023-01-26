@@ -1,14 +1,22 @@
 <script lang="ts" setup>
 import { Votable } from '@anhzf/evote-shared/models';
 import CardCandidate from 'components/CardCandidate.vue';
+import { httpsCallable } from 'firebase/functions';
 import { Dialog, Notify } from 'quasar';
 import { useVotableList } from 'src/composables/use-votable';
+import { getFns } from 'src/firebase';
 import { onMounted, reactive, watch } from 'vue';
 
 const _ui = reactive({
   isLoading: true,
 });
 const votables = useVotableList();
+
+const vote = async (voted: string) => {
+  const fn = httpsCallable(getFns(), 'voteToken-use');
+  const res = await fn({ id: voted });
+  return res;
+};
 
 const onVote = (votable: Votable) => {
   Dialog.create({
@@ -17,8 +25,8 @@ const onVote = (votable: Votable) => {
     cancel: true,
     persistent: true,
   })
-    .onOk(() => {
-      //
+    .onOk(async () => {
+      console.log(await vote(votable.uid));
     });
 };
 

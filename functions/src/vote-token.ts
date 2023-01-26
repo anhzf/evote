@@ -2,6 +2,7 @@ import {VoteToken, voteTokenOperations} from '@anhzf/evote-shared/models';
 import {QueryDocumentSnapshot, Timestamp} from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
 import {VOTE_TOKEN_EXPIRATION} from './lib/constants';
+import {voteTokenConverter} from './lib/converter';
 import * as fromSrc from './lib/models';
 import {getDb} from './utils/firebase';
 import {dbRef} from './utils/firestore';
@@ -26,6 +27,7 @@ export const get = functions.https.onCall(async (data, context) => {
     const snapshots = await t.get(query);
 
     interface TokenGroups {
+      used: QueryDocumentSnapshot<fromSrc.VoteToken>[];
       available: QueryDocumentSnapshot<fromSrc.VoteToken>[];
       expired: QueryDocumentSnapshot<fromSrc.VoteToken>[];
     }
@@ -33,6 +35,12 @@ export const get = functions.https.onCall(async (data, context) => {
     // Group tokens by availability
     const tokens = snapshots.docs.reduce<TokenGroups>((acc, doc) => {
       const data = doc.data();
+
+      if (data.voted) {
+        acc.used.push(doc);
+        return acc;
+      }
+
       const expiredAt = data.createdAt.toMillis() + VOTE_TOKEN_EXPIRATION * 1000;
 
       if (expiredAt > Timestamp.now().toMillis()) {
@@ -42,25 +50,33 @@ export const get = functions.https.onCall(async (data, context) => {
       }
 
       return acc;
-    }, {available: [], expired: []});
+    }, {available: [], used: [], expired: []});
+
+    functions.logger.debug(
+        tokens.available.map((doc) => voteTokenConverter.fromSrc(doc.data())),
+        tokens.used.map((doc) => voteTokenConverter.fromSrc(doc.data())),
+        tokens.expired.map((doc) => voteTokenConverter.fromSrc(doc.data()))
+    );
 
     // Delete vote tokens if expired
     tokens.expired.forEach((doc) => t.delete(doc.ref, {exists: true}));
+
+    // Return used vote token if there is any
+    if (tokens.used.length > 0) {
+      const [used] = tokens.used;
+      const data = used.data();
+      return {
+        ...voteTokenConverter.fromSrc(data),
+        uid: used.id,
+      };
+    }
 
     // Create new vote token if there is no available token
     if (tokens.available.length === 0) {
       const voteToken: VoteToken = voteTokenOperations.create({
         voter: voterRef.path,
       });
-      const voteTokenSrc = <fromSrc.VoteToken>{
-        voter: voterRef,
-        points: voteToken.points,
-        voted: voteToken.voted ? dbRef.votables(votingEventId).doc(voteToken.voted) : undefined,
-        meta: voteToken.meta,
-        createdAt: Timestamp.fromDate(voteToken.createdAt),
-        updatedAt: voteToken.updatedAt && Timestamp.fromDate(voteToken.updatedAt),
-        deletedAt: voteToken.deletedAt && Timestamp.fromDate(voteToken.deletedAt),
-      };
+      const voteTokenSrc = voteTokenConverter.toSrc(voteToken);
 
       t.create(collectionRef.doc(voteToken.uid), voteTokenSrc);
 
@@ -71,21 +87,45 @@ export const get = functions.https.onCall(async (data, context) => {
     const [picked] = tokens.available;
     const data = picked.data();
     return {
+      ...voteTokenConverter.fromSrc(data),
       uid: picked.id,
-      voter: data.voter.path,
-      voted: data.voted?.path,
-      points: data.points,
-      meta: data.meta,
-      createdAt: data.createdAt.toDate(),
-      updatedAt: data.updatedAt?.toDate(),
-      deletedAt: data.deletedAt?.toDate(),
     };
   });
 });
 
-// export const vote = functions.https.onCall(async (data, context) => {
+export const use = functions.https.onCall(async ({id: votableId}, context) => {
+  // Validate arguments
+  if (!votableId) {
+    throw new functions.https.HttpsError('invalid-argument', 'ID is required');
+  }
 
-// })
+  // Get voting event id and vote token id from authenticated token
+  const [, votingEventId, voteTokenId] = context.auth?.token.uid.match(dbRef.voteTokens('(.+)').doc('(.+)').path) || [];
+
+  // If not exist, throw error
+  if (!votingEventId || !voteTokenId) {
+    throw new functions.https.HttpsError('unauthenticated', 'Not allowed');
+  }
+
+  // Get vote token and check if it's existence
+  const voteTokenRef = dbRef.voteTokens(votingEventId).doc(voteTokenId);
+  const voteTokenSnapshot = await voteTokenRef.get();
+
+  if (!voteTokenSnapshot.exists) {
+    throw new functions.https.HttpsError('not-found', 'Vote token not found');
+  }
+
+  const voteToken = voteTokenSnapshot.data();
+
+  // Check if vote token is already used
+  if (voteToken?.voted) {
+    throw new functions.https.HttpsError('already-exists', 'Vote token already used');
+  }
+
+  return void voteTokenRef.update({
+    voted: dbRef.votables(votingEventId).doc(votableId),
+  });
+});
 
 export const onChange = functions.firestore
     .document(dbRef.voteTokens('{votingEventId}').doc('{voteTokenId}').path)
