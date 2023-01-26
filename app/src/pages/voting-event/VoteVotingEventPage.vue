@@ -3,8 +3,11 @@ import { Votable } from '@anhzf/evote-shared/models';
 import CardCandidate from 'components/CardCandidate.vue';
 import { Dialog, Notify } from 'quasar';
 import { useVotableList } from 'src/composables/use-votable';
-import { onMounted } from 'vue';
+import { onMounted, reactive, watch } from 'vue';
 
+const _ui = reactive({
+  isLoading: true,
+});
 const votables = useVotableList();
 
 const onVote = (votable: Votable) => {
@@ -51,6 +54,10 @@ onMounted(async () => {
     ],
   });
 });
+
+watch(votables, (v, old) => {
+  _ui.isLoading = (old === undefined && Array.isArray(v));
+}, { immediate: true });
 </script>
 
 <template>
@@ -83,5 +90,7 @@ onMounted(async () => {
         Tidak ada calon yang dapat dipilih.
       </p>
     </section>
+
+    <q-inner-loading :showing="_ui.isLoading" />
   </q-page>
 </template>

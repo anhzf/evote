@@ -8,7 +8,7 @@ import TokenViewer from 'pages/voting-event/VoterVotingEvent/TokenViewer.vue';
 import {
   Dialog, QTable, QTableColumn, QTableProps,
 } from 'quasar';
-import { useInjectedVotingEvent } from 'src/composables/use-voting-event';
+import useVotingEvent from 'src/composables/use-voting-event';
 import { getDb } from 'src/firebase';
 import {
   computed, onMounted, reactive, ref,
@@ -43,9 +43,9 @@ const appendColumns: QTableColumn<Voter>[] = [
   },
 ];
 
-const votingEvent = useInjectedVotingEvent();
+const votingEvent = useVotingEvent();
 
-const getVoterListCount = async (q: Query = collection(getDb(), 'VotingEvent', votingEvent.value.uid, 'Voter')) => {
+const getVoterListCount = async (q: Query = collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Voter')) => {
   const snapshot = await getCountFromServer(q);
   return snapshot.data().count;
 };
@@ -58,7 +58,7 @@ const fromSource = (doc: QueryDocumentSnapshot<FromSource>): Voter => {
 };
 
 const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = false) => query(
-    collection(getDb(), 'VotingEvent', votingEvent.value.uid, 'Voter') as CollectionReference<FromSource>,
+    collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Voter') as CollectionReference<FromSource>,
     // Remove where filter if there's no search input
     ...(search ? [
       where(sortBy, '>=', search),
@@ -150,7 +150,7 @@ const onTableRequest: QTableProps['onRequest'] = async (req) => {
 const onImportCSVClick = () => {
   Dialog.create({
     component: DialogVoterCsvImporter,
-    componentProps: { votingEventId: votingEvent.value.uid },
+    componentProps: { votingEventId: votingEvent.value!.uid },
   });
 };
 

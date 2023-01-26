@@ -4,11 +4,11 @@ import {
 } from 'firebase/firestore';
 import { ref as refStorage } from 'firebase/storage';
 import { useDocs } from 'src/composables/use-firestore';
-import { useInjectedVotingEvent } from 'src/composables/use-voting-event';
+import useVotingEvent from 'src/composables/use-voting-event';
 import { getDb, getStorage } from 'src/firebase';
 import { computed, Ref } from 'vue';
 
-interface _useVotableList {
+interface $useVotableList {
   (): Ref<Votable[]>;
 }
 
@@ -41,8 +41,8 @@ const fromSource = (snapshot: QueryDocumentSnapshot<FromFirestore>) => {
 /**
  * Firestore implementation
  */
-export const useVotableList: _useVotableList = () => {
-  const votingEvent = useInjectedVotingEvent();
+export const useVotableList: $useVotableList = () => {
+  const votingEvent = useVotingEvent();
   const collectionRef = computed(() => getCollectionRef(votingEvent.value!.uid));
   const snapshot = useDocs(collectionRef);
 

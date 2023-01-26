@@ -82,3 +82,13 @@ export const get = functions.https.onCall(async (data, context) => {
     };
   });
 });
+
+// export const vote = functions.https.onCall(async (data, context) => {
+
+// })
+
+export const onChange = functions.firestore
+    .document(dbRef.voteTokens('{votingEventId}').doc('{voteTokenId}').path)
+    .onWrite(async (diff, context) => {
+      // const {votingEventId} = context.params;
+    });

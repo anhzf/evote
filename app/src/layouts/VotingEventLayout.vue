@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
 import { useHead } from '@vueuse/head';
 import DialogLogin from 'components/DialogLogin.vue';
 import { signOut } from 'firebase/auth';
@@ -7,6 +8,7 @@ import useVotingEvent from 'src/composables/use-voting-event';
 import { provide, ref, watch } from 'vue';
 import { useCurrentUser, useFirebaseAuth } from 'vuefire';
 
+const router = useRouter();
 const votingEvent = useVotingEvent();
 const auth = useFirebaseAuth();
 const user = useCurrentUser();
@@ -20,14 +22,20 @@ const toggleRightDrawer = () => {
 const showLoginDialog = () => {
   Dialog.create({
     component: DialogLogin,
-  });
+  })
+    .onOk(() => {
+      router.push({ name: 'VotingEvent-Vote' });
+    });
 };
 
 const logout = async () => {
+  const stopLoading = Loading.show();
+
   if (auth) {
     await signOut(auth);
   }
 
+  stopLoading();
   rightDrawerOpen.value = false;
 };
 

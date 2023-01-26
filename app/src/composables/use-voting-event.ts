@@ -1,4 +1,5 @@
 import { VotingEvent } from '@anhzf/evote-shared/models';
+import { createGlobalState } from '@vueuse/core';
 import {
   collection, CollectionReference, limit, query, Timestamp, where,
 } from 'firebase/firestore';
@@ -7,7 +8,7 @@ import { getDb } from 'src/firebase';
 import { computed, inject, Ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-interface _useVotingEvent {
+interface $useVotingEvent {
   (): Ref<VotingEvent | undefined>;
 }
 
@@ -22,7 +23,7 @@ interface FromFirestore {
 /**
  * Firestore implementation
  */
-const useVotingEvent: _useVotingEvent = () => {
+const _useVotingEvent: $useVotingEvent = () => {
   const route = useRoute();
   const q = computed(() => {
     const slug = route.params.votingEventName as string;
@@ -49,6 +50,6 @@ const useVotingEvent: _useVotingEvent = () => {
   });
 };
 
-export const useInjectedVotingEvent = () => inject<Ref<VotingEvent>>('voting-event')!;
+const useVotingEvent = createGlobalState(_useVotingEvent);
 
 export default useVotingEvent;

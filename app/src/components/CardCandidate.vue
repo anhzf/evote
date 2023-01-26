@@ -34,7 +34,7 @@ watchOnce(() => showDialog.value === true, () => {
 </script>
 
 <template>
-  <q-card @click="$emit('vote', uid)">
+  <q-card>
     <q-img
       :src="imgUrl"
       :ratio="4/3"

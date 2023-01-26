@@ -3,17 +3,17 @@ import { useAsyncState } from '@vueuse/core';
 import { copyToClipboard, Notify } from 'quasar';
 import { defineProps } from 'vue';
 import VoteToken from 'src/actions/vote-token';
-import { useInjectedVotingEvent } from 'src/composables/use-voting-event';
+import useVotingEvent from 'src/composables/use-voting-event';
 
 const props = defineProps<{
   voterId: string;
 }>();
 
-const votingEvent = useInjectedVotingEvent();
+const votingEvent = useVotingEvent();
 const {
   state: voteToken, isLoading, execute,
 } = useAsyncState(
-  () => VoteToken.get({ votingEventId: votingEvent.value.uid, voterId: props.voterId }),
+  () => VoteToken.get({ votingEventId: votingEvent.value!.uid, voterId: props.voterId }),
   undefined,
   { immediate: false },
 );
@@ -25,6 +25,7 @@ const copyTokenToClipboard = async () => {
 </script>
 
 <template>
+  <!-- TODO: Change QPopupProxy to QInput -->
   <q-btn
     color="primary"
     label="Lihat Token"

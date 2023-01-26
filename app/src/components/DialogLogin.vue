@@ -1,16 +1,34 @@
 <script lang="ts" setup>
+import auth from 'actions/auth';
 import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
-import { Notify, useDialogPluginComponent } from 'quasar';
+import { Notify, QForm, useDialogPluginComponent } from 'quasar';
+import useVotingEvent from 'src/composables/use-voting-event';
 import { getAuth } from 'src/firebase';
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
 
 defineEmits(useDialogPluginComponent.emits);
 
-const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
+const {
+  dialogRef, onDialogHide, onDialogCancel, onDialogOK,
+} = useDialogPluginComponent();
 
+const votingEvent = useVotingEvent();
+const voteTokenSignInForm = ref<QForm>();
 const token = ref('');
+const _ui = reactive({
+  isLoading: false,
+});
 
-const onGoogleLoginClick = () => {
+const signInWithVoteToken = async () => {
+  _ui.isLoading = true;
+  if (votingEvent.value) {
+    await auth.loginVoteToken({ votingEventId: votingEvent.value.uid, voteToken: token.value });
+  }
+  _ui.isLoading = false;
+  onDialogOK();
+};
+
+const signInWithGoogle = () => {
   const provider = new GoogleAuthProvider();
 
   return signInWithRedirect(getAuth()!, provider)
@@ -42,10 +60,14 @@ const onGoogleLoginClick = () => {
       </q-card-section>
 
       <q-card-section>
-        <q-form>
+        <q-form
+          ref="voteTokenSignInForm"
+          @submit="signInWithVoteToken"
+        >
           <q-input
             v-model="token"
             label="Masukkan Token"
+            autofocus
           />
         </q-form>
       </q-card-section>
@@ -54,6 +76,7 @@ const onGoogleLoginClick = () => {
         <q-btn
           label="Masuk"
           color="primary"
+          @click="voteTokenSignInForm?.submit"
         />
       </q-card-actions>
 
@@ -68,9 +91,11 @@ const onGoogleLoginClick = () => {
       <q-card-actions vertical>
         <q-btn
           label="Masuk dengan Google"
-          @click="onGoogleLoginClick"
+          @click="signInWithGoogle"
         />
       </q-card-actions>
+
+      <q-inner-loading :showing="_ui.isLoading" />
     </q-card>
   </q-dialog>
 </template>
