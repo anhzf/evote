@@ -1,27 +1,47 @@
 <script lang="ts" setup>
 import { Pie } from 'vue-chartjs';
 import {
-  Chart as ChartJS, Title, Tooltip, Legend, CategoryScale, ArcElement,
+  Chart as ChartJS, Colors, Title, Tooltip, Legend, CategoryScale, ArcElement,
 } from 'chart.js';
+import { computed } from 'vue';
 
-ChartJS.register(Title, Tooltip, Legend, CategoryScale, ArcElement);
+ChartJS.register(Title, Colors, Tooltip, Legend, CategoryScale, ArcElement);
+
+interface Props {
+  data: {
+    label: string;
+    data: number;
+  }[]
+}
+
+const props = defineProps<Props>();
+
+const labels = computed(() => props.data.map((d) => d.label));
+const data = computed(() => props.data.map((d) => d.data));
 </script>
 
 <template>
   <Pie
     :options="{
       responsive: true,
+      plugins: {
+        colors: {
+          forceOverride: true,
+        },
+        legend: {
+          labels: {
+            font: {
+              size: 16,
+            },
+          }
+        }
+      }
     }"
     :data="{
-      labels: ['M. Abdul Aziz', 'N. Abdul Aziz', 'O. Abdul Aziz'],
+      labels,
       datasets: [{
-        data: [1231,432, 123],
-        backgroundColor: [
-          'rgb(255, 99, 132)',
-          'rgb(54, 162, 235)',
-          'rgb(255, 205, 86)'
-        ],
-      }]
+        data,
+      }],
     }"
   />
 </template>
