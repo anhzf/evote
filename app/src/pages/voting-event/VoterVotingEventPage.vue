@@ -6,7 +6,7 @@ import {
 } from 'firebase/firestore';
 import TokenViewer from 'pages/voting-event/VoterVotingEvent/TokenViewer.vue';
 import {
-  Dialog, QTable, QTableColumn, QTableProps,
+  Dialog, Notify, QTable, QTableColumn, QTableProps,
 } from 'quasar';
 import useVotingEvent from 'src/composables/use-voting-event';
 import { getDb } from 'src/firebase';
@@ -156,7 +156,15 @@ const onImportCSVClick = () => {
     });
 };
 
-onMounted(async () => {
+const onDeleteClick = () => {
+  Notify.create({
+    message: 'Not implemented yet',
+    color: 'negative',
+  });
+  throw new Error('Not implemented yet');
+};
+
+onMounted(() => {
   table.value?.requestServerInteraction();
 });
 </script>
@@ -173,7 +181,7 @@ onMounted(async () => {
       title="Daftar pemilih"
       :columns="columns"
       :rows="rows"
-      row-key="id"
+      row-key="uid"
       selection="multiple"
       :filter="filter"
       :loading="_ui.isLoading"
@@ -200,17 +208,18 @@ onMounted(async () => {
             @click="onImportCSVClick"
           />
 
-          <q-btn
+          <!-- <q-btn
             label="Tambah"
             unelevated
             color="positive"
-          />
+          /> -->
 
           <q-btn
             v-if="selected.length"
             label="Hapus"
             unelevated
             color="negative"
+            @click="onDeleteClick"
           />
         </div>
       </template>

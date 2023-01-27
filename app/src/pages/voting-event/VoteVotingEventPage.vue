@@ -2,7 +2,7 @@
 import { Votable } from '@anhzf/evote-shared/models';
 import CardCandidate from 'components/CardCandidate.vue';
 import { httpsCallable } from 'firebase/functions';
-import { Dialog, Notify } from 'quasar';
+import { Dialog, Loading, Notify } from 'quasar';
 import { useVotableList } from 'src/composables/use-votable';
 import { getFns } from 'src/firebase';
 import { onMounted, reactive, watch } from 'vue';
@@ -26,7 +26,16 @@ const onVote = (votable: Votable) => {
     persistent: true,
   })
     .onOk(async () => {
-      console.log(await vote(votable.uid));
+      Loading.show();
+      await vote(votable.uid);
+      Loading.hide();
+
+      Dialog.create({
+        title: 'Terima kasih',
+        message: 'Terima kasih telah memberikan suara anda. Silakan logout untuk mengakhiri sesi anda.',
+        persistent: true,
+        color: 'positive',
+      });
     });
 };
 

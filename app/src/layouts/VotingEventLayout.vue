@@ -1,17 +1,29 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { useAsyncState, whenever } from '@vueuse/core';
 import { useHead } from '@vueuse/head';
+import { VotingEventUser } from 'app/../packages/shared/models';
 import DialogLogin from 'components/DialogLogin.vue';
 import { signOut } from 'firebase/auth';
-import { Dialog, Loading } from 'quasar';
+import {
+  collection, doc, getDoc, getDocs, limitToLast, orderBy, query, Timestamp, where,
+} from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import { Dialog, Loading, Notify } from 'quasar';
 import useVotingEvent from 'src/composables/use-voting-event';
+import { getDb, getFns } from 'src/firebase';
 import { provide, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useCurrentUser, useFirebaseAuth } from 'vuefire';
 
 const router = useRouter();
 const votingEvent = useVotingEvent();
 const auth = useFirebaseAuth();
 const user = useCurrentUser();
+const { state: votingEventUser, execute: refreshVotingEventUser } = useAsyncState(async () => {
+  const docRef = doc(getDb(), 'VotingEvent', votingEvent.value!.uid, 'User', user.value!.uid);
+  const snapshot = await getDoc(docRef);
+  return snapshot.data() as VotingEventUser;
+}, undefined, { immediate: false, throwError: true });
 
 const rightDrawerOpen = ref(false);
 
@@ -43,6 +55,47 @@ const logout = async () => {
 watch(votingEvent, (v) => {
   if (v === undefined) Loading.show();
   else Loading.hide();
+});
+
+whenever(() => !!(user.value && votingEvent.value), async () => {
+  refreshVotingEventUser();
+
+  const invitationQ = query(
+    collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Invitation'),
+    where('email', '==', user.value!.email),
+    where('acceptedAt', '==', null),
+    where('expiredAt', '>=', Timestamp.now()),
+    orderBy('expiredAt'),
+    limitToLast(1),
+  );
+  const invitationSnapshots = await getDocs(invitationQ);
+  const [invitation] = invitationSnapshots.docs;
+
+  if (invitation) {
+    Dialog.create({
+      title: 'Undangan',
+      message: `Anda telah diundang untuk menjadi ${invitation.data().role} dalam ${votingEvent.value?.title}.`,
+      persistent: true,
+      ok: {
+        label: 'Terima',
+        color: 'primary',
+      },
+      cancel: 'Tolak',
+    })
+      .onOk(async () => {
+        Loading.show({ message: 'Memproses...' });
+        try {
+          await httpsCallable(getFns(), 'invitation-accept')(invitation.ref.path);
+          refreshVotingEventUser();
+          router.push({ name: 'VotingEvent-Voter' });
+        } catch (error) {
+          if (error instanceof Error) Notify.create({ color: 'negative', message: error.message });
+          else console.error(error);
+        } finally {
+          Loading.hide();
+        }
+      });
+  }
 });
 
 provide('voting-event', votingEvent);
@@ -114,16 +167,19 @@ useHead({
           icon="how_to_vote"
         />
         <q-route-tab
+          v-if="votingEventUser?.role === 'admin'"
           label="Hasil"
           :to="{name: 'VotingEvent-Results'}"
           icon="poll"
         />
         <q-route-tab
+          v-if="votingEventUser?.role === 'admin'"
           label="Daftar Pemilih"
           :to="{name: 'VotingEvent-Voter'}"
           icon="group"
         />
         <q-route-tab
+          v-if="votingEventUser?.role === 'admin'"
           label="Pengaturan"
           :to="{name: 'VotingEvent-Settings'}"
           icon="settings"

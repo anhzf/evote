@@ -43,6 +43,9 @@ const copyTokenToClipboard = async () => {
           :loading="isLoading"
           class="select-all w-screen-xs"
           input-class="font-mono"
+          hint="Token sudah digunakan"
+          :disable="!!voteToken?.voted"
+          :hide-hint="!voteToken?.voted"
         >
           <template #prepend>
             <q-btn

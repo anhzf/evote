@@ -21,7 +21,6 @@
     "firebase-functions": "^4.2.0"
   },
   "devDependencies": {
-    "@anhzf/evote-shared": "workspace:^0.0.1",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "esbuild": "^0.17.0",

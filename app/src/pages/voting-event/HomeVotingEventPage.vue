@@ -17,37 +17,37 @@
       <ul class="list-none m-0 p-0 flex gap-4">
         <li>
           <q-btn
-            label="DEMA UNS"
-            icon="mdi-facebook"
-            flat
-            href="https://www.facebook.com/"
-            target="_blank"
-          />
-        </li>
-        <li>
-          <q-btn
-            label="@dema.uns"
-            icon="mdi-instagram"
-            flat
-            href="https://www.instagram.com/"
-            target="_blank"
-          />
-        </li>
-        <li>
-          <q-btn
-            label="pemilihan@dema.uns.ac.id"
-            icon="mdi-email"
-            flat
-            href="mailto:me@anhzf.dev"
-            target="_blank"
-          />
-        </li>
-        <li>
-          <q-btn
-            label="dema.uns.ac.id"
+            label="smpn23surakarta.sch.id"
             icon="mdi-web"
             flat
-            href="https://dema.uns.ac.id/"
+            href="https://smpn23surakarta.sch.id/"
+            target="_blank"
+          />
+        </li>
+        <li>
+          <q-btn
+            label="SMP Negeri 23 Surakarta Official"
+            icon="mdi-youtube"
+            flat
+            href="https://www.youtube.com/@smpnegeri23surakartaoffici12"
+            target="_blank"
+          />
+        </li>
+        <li>
+          <q-btn
+            label="SMPN 23 Surakarta"
+            icon="mdi-facebook"
+            flat
+            href="https://facebook.com/smpnegeri23surakarta/"
+            target="_blank"
+          />
+        </li>
+        <li>
+          <q-btn
+            label="@smpnegeri23surakarta_official"
+            icon="mdi-instagram"
+            flat
+            href="https://www.instagram.com/smpnegeri23surakarta_official/"
             target="_blank"
           />
         </li>

@@ -15,4 +15,10 @@ export const dbRef = {
 
   voters: (votingEventId: string) => dbRef.votingEvents().doc(votingEventId)
       .collection('Voter') as CollectionReference<fromSrc.Voter>,
+
+  votingEventUsers: (votingEventId: string) => dbRef.votingEvents().doc(votingEventId)
+      .collection('User') as CollectionReference<fromSrc.VotingEventUser>,
+
+  invitations: (votingEventId: string) => dbRef.votingEvents().doc(votingEventId)
+      .collection('Invitation') as CollectionReference<fromSrc.Invitation>,
 };
