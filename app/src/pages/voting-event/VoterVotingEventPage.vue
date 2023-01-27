@@ -1,14 +1,30 @@
 <script lang="ts" setup>
 import { Voter } from '@anhzf/evote-shared/models';
+import { arrayChunks } from 'app/../packages/shared/utils';
 import DialogVoterCsvImporter from 'components/DialogVoterCsvImporter.vue';
+import { FirebaseError } from 'firebase/app';
 import {
-  collection, CollectionReference, getCountFromServer, getDocs, limit, orderBy, Query, query, QueryDocumentSnapshot, startAt, Timestamp, where,
+  collection,
+  CollectionReference,
+  doc,
+  getCountFromServer,
+  getDocs,
+  limit,
+  orderBy,
+  Query,
+  query,
+  QueryDocumentSnapshot,
+  startAt,
+  Timestamp,
+  where,
+  writeBatch,
 } from 'firebase/firestore';
 import TokenViewer from 'pages/voting-event/VoterVotingEvent/TokenViewer.vue';
 import {
   Dialog, Notify, QTable, QTableColumn, QTableProps,
 } from 'quasar';
 import useVotingEvent from 'src/composables/use-voting-event';
+import { FIREBASE_WRITE_LIMIT } from 'src/constants';
 import { getDb } from 'src/firebase';
 import {
   computed, onMounted, reactive, ref,
@@ -50,10 +66,10 @@ const getVoterListCount = async (q: Query = collection(getDb(), 'VotingEvent', v
   return snapshot.data().count;
 };
 
-const fromSource = (doc: QueryDocumentSnapshot<FromSource>): Voter => {
-  const data = doc.data();
+const fromSource = (snapshot: QueryDocumentSnapshot<FromSource>): Voter => {
+  const data = snapshot.data();
   return {
-    ...data, createdAt: data.createdAt.toDate(), updatedAt: data.updatedAt?.toDate(), deletedAt: data.deletedAt?.toDate(), uid: doc.id,
+    ...data, createdAt: data.createdAt.toDate(), updatedAt: data.updatedAt?.toDate(), deletedAt: data.deletedAt?.toDate(), uid: snapshot.id,
   };
 };
 
@@ -132,9 +148,11 @@ const onTableRequest: QTableProps['onRequest'] = async (req) => {
     getVoterListCount(q),
   ]);
 
-  const voters = snapshot.docs.map(fromSource);
+  rows.value = snapshot.docs.map(fromSource);
 
-  rows.value.splice(0, rows.value.length, ...voters);
+  // rows.value.splice(0, rows.value.length, ...voters);
+
+  debugger;
 
   pagination.value = {
     page,
@@ -156,12 +174,43 @@ const onImportCSVClick = () => {
     });
 };
 
-const onDeleteClick = () => {
-  Notify.create({
-    message: 'Not implemented yet',
-    color: 'negative',
-  });
-  throw new Error('Not implemented yet');
+const onDeleteClick = async () => {
+  _ui.isLoading = true;
+
+  try {
+    const db = getDb();
+    const chunks = arrayChunks(selected.value, FIREBASE_WRITE_LIMIT);
+    const voterCollectionRef = collection(db, 'VotingEvent', votingEvent.value!.uid, 'Voter') as CollectionReference<Voter>;
+
+    await Promise.all(chunks.map((chunk) => {
+      const batch = writeBatch(db);
+
+      chunk.forEach(({ uid }) => {
+        const docRef = uid ? doc(voterCollectionRef, uid) : doc(voterCollectionRef);
+        batch.delete(docRef);
+      });
+
+      return batch.commit();
+    }));
+
+    Notify.create({
+      message: 'Berhasil menghapus pemilih',
+      color: 'positive',
+    });
+
+    table.value?.requestServerInteraction();
+  } catch (error) {
+    if (error instanceof FirebaseError) {
+      Notify.create({
+        message: error.message,
+        color: 'negative',
+      });
+    }
+
+    console.error(error);
+  } finally {
+    _ui.isLoading = false;
+  }
 };
 
 onMounted(() => {

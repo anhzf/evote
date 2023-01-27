@@ -23,8 +23,8 @@ const resultCount = asyncComputed(() => Promise.all([
     return snapshot.data().count;
   }),
   (async () => {
-    const voteTokenCollection = collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'VoteToken');
-    const snapshot = await getCountFromServer(voteTokenCollection);
+    const voterCollection = collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Voter');
+    const snapshot = await getCountFromServer(voterCollection);
     return snapshot.data().count;
   })(),
 ]), <number[]>[]);

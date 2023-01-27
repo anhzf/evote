@@ -74,7 +74,7 @@ whenever(() => !!(user.value && votingEvent.value), async () => {
   if (invitation) {
     Dialog.create({
       title: 'Undangan',
-      message: `Anda telah diundang untuk menjadi ${invitation.data().role} dalam ${votingEvent.value?.title}.`,
+      message: `Anda telah diundang untuk menjadi "${invitation.data().role}" dalam "${votingEvent.value?.title}".`,
       persistent: true,
       ok: {
         label: 'Terima',
