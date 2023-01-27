@@ -29,6 +29,7 @@ const data = computed(() => props.data.map((d) => d.data));
           forceOverride: true,
         },
         legend: {
+          position: 'bottom',
           labels: {
             font: {
               size: 16,
