@@ -117,6 +117,7 @@ export const use = functions.https.onCall(async ({id: votableId}, context) => {
 
   return void voteTokenRef.update({
     voted: dbRef.votables(votingEventId).doc(votableId),
+    votedAt: Timestamp.now(),
   });
 });
 

@@ -37,6 +37,7 @@ export interface Votable extends Omit<_Votable, keyof Model | 'ref'>, Model {
 export interface VoteToken extends Omit<_VoteToken, keyof Model | 'voter' | 'voted'>, Model {
   voter: DocumentReference<Voter>;
   voted?: DocumentReference<Votable>;
+  votedAt?: Timestamp;
 }
 
 export interface Invitation extends Omit<_Invitation, keyof Model>, Model {
