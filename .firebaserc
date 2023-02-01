@@ -6,9 +6,6 @@
     "anh-election-app": {
       "hosting": {
         "primary": [
-          "anhzf-election"
-        ],
-        "alt": [
           "anh-election-app"
         ]
       }
