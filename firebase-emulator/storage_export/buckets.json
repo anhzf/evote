@@ -1,10 +1,10 @@
 {
   "buckets": [
     {
-      "id": "default-bucket"
+      "id": "anh-election-app.appspot.com"
     },
     {
-      "id": "anh-election-app.appspot.com"
+      "id": "default-bucket"
     }
   ]
 }

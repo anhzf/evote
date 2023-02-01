@@ -6,16 +6,13 @@ import { FirebaseError } from 'firebase/app';
 import {
   collection,
   CollectionReference,
-  doc,
-  getCountFromServer,
+  doc, getCountFromServer,
   getDocs,
   limit,
   orderBy,
   Query,
   query,
-  QueryDocumentSnapshot,
-  startAt,
-  Timestamp,
+  QueryDocumentSnapshot, Timestamp,
   where,
   writeBatch,
 } from 'firebase/firestore';
@@ -73,17 +70,6 @@ const fromSource = (snapshot: QueryDocumentSnapshot<FromSource>): Voter => {
   };
 };
 
-const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = false) => query(
-    collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Voter') as CollectionReference<FromSource>,
-    // Remove where filter if there's no search input
-    ...(search ? [
-      where(sortBy, '>=', search),
-      where(sortBy, '<=', `${search}\uf8ff`),
-    ] : []),
-    orderBy(sortBy, descending ? 'desc' : 'asc'),
-    startAt(start),
-);
-
 const selected = ref<Voter[]>([]);
 const filter = ref('');
 const table = ref<QTable>();
@@ -95,33 +81,32 @@ const pagination = ref<NonNullable<QTableProps['pagination']>>({
 });
 const _ui = reactive({
   isLoading: false,
+  showedToken: 0,
 });
 
 const rows = ref<Voter[]>([]);
 const columns = computed<QTableColumn<Voter>[]>(() => [
   ...prependColumns,
   {
-    name: 'meta.NAMA',
-    label: 'NAMA',
-    field: (r) => r.meta.NAMA,
+    name: 'meta',
+    label: 'LABEL',
+    field: (r) => r.meta,
     align: 'left',
+    headerClasses: 'w-5/8',
   },
-  {
-    name: 'meta.KATEGORI',
-    label: 'KATEGORI',
-    field: (r) => r.meta.KATEGORI,
-    align: 'left',
-  },
-  // TODO: Dynamic Key
-  // ...Object.keys(voterList.value[0]?.meta || {}).map((k) => ({
-  //   name: `meta.${k}`,
-  //   label: k.toUpperCase(),
-  //   field: (r) => (r.meta as Record<string, unknown>)[k],
-  //   align: 'left',
-  //   sortable: true,
-  // } as QTableColumn<Voter>)),
   ...appendColumns,
 ]);
+
+const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = false) => (query(
+    collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Voter') as CollectionReference<FromSource>,
+    // Remove where filter if there's no search input
+    ...(search ? [
+      where(sortBy, '>=', search),
+      where(sortBy, '<=', `${search}\uf8ff`),
+    ] : []),
+    orderBy(sortBy, descending ? 'desc' : 'asc'),
+  // ...(rows.value.at(-1) ? [startAfter(rows.value.at(-1)![sortBy])] : []),
+));
 
 /**
  * TODO: Refactor to composables
@@ -150,10 +135,6 @@ const onTableRequest: QTableProps['onRequest'] = async (req) => {
 
   rows.value = snapshot.docs.map(fromSource);
 
-  // rows.value.splice(0, rows.value.length, ...voters);
-
-  debugger;
-
   pagination.value = {
     page,
     rowsPerPage,
@@ -163,6 +144,17 @@ const onTableRequest: QTableProps['onRequest'] = async (req) => {
   };
 
   _ui.isLoading = false;
+};
+
+const onTableVirtualScroll: QTableProps['onVirtualScroll'] = async () => {
+  //
+};
+
+const onAddVoterClick = () => {
+  Notify.create({
+    message: 'Fitur ini belum tersedia',
+    color: 'warning',
+  });
 };
 
 const onImportCSVClick = () => {
@@ -198,6 +190,7 @@ const onDeleteClick = async () => {
       color: 'positive',
     });
 
+    selected.value = [];
     table.value?.requestServerInteraction();
   } catch (error) {
     if (error instanceof FirebaseError) {
@@ -241,27 +234,41 @@ onMounted(() => {
       <template #top-right>
         <div class="row q-gutter-x-md">
           <q-input
-            v-model="filter"
+            v-model.trim.lazy="filter"
             label="Cari..."
             dense
             debounce="300"
+            class="w-32ch"
           >
             <template #append>
               <q-icon name="search" />
             </template>
           </q-input>
 
-          <q-btn
-            label="Impor CSV"
-            outline
-            @click="onImportCSVClick"
-          />
-
-          <!-- <q-btn
+          <q-btn-dropdown
             label="Tambah"
-            unelevated
-            color="positive"
-          /> -->
+            split
+            icon="add"
+            color="secondary"
+            @click="onAddVoterClick"
+          >
+            <q-list>
+              <q-item
+                clickable
+                v-close-popup
+                @click="onImportCSVClick"
+              >
+                <q-item-section avatar>
+                  <q-icon
+                    name="upload_file"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Impor CSV</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
 
           <q-btn
             v-if="selected.length"
@@ -273,10 +280,31 @@ onMounted(() => {
         </div>
       </template>
 
+      <template #body-cell-meta="props">
+        <q-td :props="props">
+          <div class="row gap-x-0.5">
+            <q-chip
+              v-for="(label, key) in props.value"
+              :key="key"
+              size="0.7rem"
+              clickable
+              class="q-mx-none"
+            >
+              <span>{{ key }}: </span>
+              <span class="font-semibold">{{ label }}</span>
+            </q-chip>
+          </div>
+        </q-td>
+      </template>
+
       <template #body-cell-token="props">
         <q-td :props="props">
           <div class="row justify-end q-gutter-x-sm">
-            <TokenViewer :voter-id="props.value" />
+            <token-viewer
+              :voter-id="props.value"
+              :show-token="_ui.showedToken === props.rowIndex"
+              @view-token="() => { _ui.showedToken = props.rowIndex; }"
+            />
           </div>
         </q-td>
       </template>
