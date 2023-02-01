@@ -9,7 +9,7 @@ import {
 import { Notify, useDialogPluginComponent } from 'quasar';
 import useVotingEvent from 'src/composables/use-voting-event';
 import { getDb } from 'src/firebase';
-import { defineEmits, reactive, ref } from 'vue';
+import { reactive, ref } from 'vue';
 
 const FIREBASE_WRITE_LIMIT = 500;
 
@@ -28,7 +28,6 @@ const saveVoterBatch = async (voters: Voter[]) => {
 
   return Promise.all(chunks.map((chunk) => {
     const batch = writeBatch(db);
-
     chunk.forEach((v) => {
       const { uid, ...data } = v;
       const docRef = uid ? doc(voterCollectionRef, uid) : doc(voterCollectionRef);
