@@ -2,10 +2,6 @@
   "name": "@anhzf/evote-shared",
   "version": "0.0.1",
   "description": "",
-  "exports": {
-    "./models": "./dist/models/index.js",
-    "./utils": "./dist/utils/index.js"
-  },
   "scripts": {
     "build": "tsc",
     "build:prod": "tsc",
