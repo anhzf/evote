@@ -1,29 +1,29 @@
-import concurrently from 'concurrently'
-import dotenv from 'dotenv'
+import concurrently from 'concurrently';
+import dotenv from 'dotenv';
 
 dotenv.config()
 
-const useEmulator = !!process.argv.includes('--emulator')
-process.env.FIREBASE_EMULATOR = useEmulator
+const useEmulator = !!process.argv.includes('--emulator');
+process.env.FIREBASE_EMULATOR = useEmulator;
 
 concurrently([
   {
     name: 'shared',
-    command: 'pnpm -C packages/shared dev',
+    command: 'cd ./packages/shared && npm run dev',
   },
   ...(useEmulator ? [
     {
       name: 'emulator',
-      command: 'pnpm start:emulator',
+      command: 'npm run start:emulator',
     },
     {
       name: 'functions',
-      command: 'pnpm -C functions dev',
+      command: 'cd ./functions && npm run functions dev',
     }
   ] : []),
   {
     name: 'app',
-    command: 'pnpm -C app dev',
+    command: 'cd ./app && npm run dev',
   },
 ].filter(Boolean), {
   killOthers: ['failure', 'success'],
