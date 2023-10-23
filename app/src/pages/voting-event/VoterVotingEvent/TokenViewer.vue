@@ -48,6 +48,7 @@ const copyTokenToClipboard = async () => {
     hint="Token sudah digunakan"
     :hide-hint="!voteToken?.voted"
     input-class="font-mono font-semibold"
+    autocomplete="off"
     class="w-30ch primary"
   >
     <template #append>

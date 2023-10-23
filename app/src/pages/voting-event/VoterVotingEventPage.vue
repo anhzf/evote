@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { Voter } from '@anhzf/evote-shared/models';
+import { get } from '@anhzf/evote-shared/utils';
 import { arrayChunks } from 'app/../packages/shared/utils';
 import DialogVoterCsvImporter from 'components/DialogVoterCsvImporter.vue';
 import { FirebaseError } from 'firebase/app';
@@ -12,7 +13,7 @@ import {
   orderBy,
   Query,
   query,
-  QueryDocumentSnapshot, Timestamp,
+  QueryDocumentSnapshot, startAfter, Timestamp,
   where,
   writeBatch,
 } from 'firebase/firestore';
@@ -71,6 +72,7 @@ const fromSource = (snapshot: QueryDocumentSnapshot<FromSource>): Voter => {
 };
 
 const selected = ref<Voter[]>([]);
+const isVoted = ref(false);
 const filter = ref('');
 const table = ref<QTable>();
 const pagination = ref<NonNullable<QTableProps['pagination']>>({
@@ -105,7 +107,8 @@ const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = f
       where(sortBy, '<=', `${search}\uf8ff`),
     ] : []),
     orderBy(sortBy, descending ? 'desc' : 'asc'),
-  // ...(rows.value.at(-1) ? [startAfter(rows.value.at(-1)![sortBy])] : []),
+    // ...(isVoted.value ? [] : [where('voted', '==', null)]),
+    ...(rows.value.at(-1) ? [startAfter(get(rows.value.at(-1)!, sortBy))] : []),
 ));
 
 /**
@@ -233,12 +236,17 @@ onMounted(() => {
     >
       <template #top-right>
         <div class="row q-gutter-x-md">
+          <q-checkbox
+            v-model="isVoted"
+            label="Sudah memilih"
+            left-label
+          />
           <q-input
             v-model.trim.lazy="filter"
             label="Cari..."
             dense
             debounce="300"
-            class="w-32ch"
+            input-class="w-32ch"
           >
             <template #append>
               <q-icon name="search" />
