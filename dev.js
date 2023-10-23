@@ -7,10 +7,6 @@ const useEmulator = !!process.argv.includes('--emulator');
 process.env.FIREBASE_EMULATOR = useEmulator;
 
 concurrently([
-  {
-    name: 'shared',
-    command: 'cd ./packages/shared && npm run dev',
-  },
   ...(useEmulator ? [
     {
       name: 'emulator',
@@ -18,7 +14,7 @@ concurrently([
     },
     {
       name: 'functions',
-      command: 'cd ./functions && npm run functions dev',
+      command: 'cd ./functions && npm run dev',
     }
   ] : []),
   {

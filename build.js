@@ -5,16 +5,12 @@ dotenv.config()
 
 concurrently([
   {
-    name: 'shared',
-    command: 'pnpm -C packages/shared build',
-  },
-  {
     name: 'app',
-    command: 'pnpm -C app build',
+    command: 'cd ./packages/shared && npm run build',
   },
   {
     name: 'functions',
-    command: 'pnpm -C functions build',
+    command: 'cd ./functions && npm run build',
   }
 ])
   .result.finally(() => { })
