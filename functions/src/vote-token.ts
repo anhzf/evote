@@ -8,6 +8,8 @@ import {getDb} from './utils/firebase';
 import {dbRef} from './utils/firestore';
 
 /**
+ * Generate new vote token
+ *
  * TODO: Prevent same VoteToken
  */
 export const get = functions.https.onCall(async (data, context) => {
@@ -92,8 +94,10 @@ export const use = functions.https.onCall(async ({id: votableId}, context) => {
     throw new functions.https.HttpsError('invalid-argument', 'ID is required');
   }
 
+  const voteTokenRefRegex = new RegExp(dbRef.voteTokens('(.+)').doc('(.+)').path);
+
   // Get voting event id and vote token id from authenticated token
-  const [, votingEventId, voteTokenId] = context.auth?.token.uid.match(dbRef.voteTokens('(.+)').doc('(.+)').path) || [];
+  const [, votingEventId, voteTokenId] = context.auth?.token.uid.match(voteTokenRefRegex) || [];
 
   // If not exist, throw error
   if (!votingEventId || !voteTokenId) {
@@ -121,8 +125,8 @@ export const use = functions.https.onCall(async ({id: votableId}, context) => {
   });
 });
 
-export const onChange = functions.firestore
-    .document(dbRef.voteTokens('{votingEventId}').doc('{voteTokenId}').path)
-    .onWrite(async (diff, context) => {
-      // const {votingEventId} = context.params;
-    });
+// export const onChange = functions.firestore
+//     .document(dbRef.voteTokens('{votingEventId}').doc('{voteTokenId}').path)
+//     .onWrite(async (diff, context) => {
+//       // const {votingEventId} = context.params;
+//     });

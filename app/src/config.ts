@@ -6,6 +6,7 @@ export default Object.freeze({
   firebase: {
     config: process.env.FIREBASE_CONFIG as FirebaseOptions,
     useEmulator: process.env.FIREBASE_EMULATOR,
+    // useEmulator: true,
     emulatorHost: 'localhost',
     emulatorPort: {
       firestore: firebaseJson.emulators.firestore.port,

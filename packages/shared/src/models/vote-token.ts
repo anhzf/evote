@@ -22,3 +22,5 @@ const create = <T extends RequiredAttributes>(data?: T): VoteToken & T => modelO
 export const voteTokenOperations = {
   create,
 };
+
+export const isTokenUsed = (token: VoteToken) => token.voted !== undefined;

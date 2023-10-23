@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { useAsyncState, whenever } from '@vueuse/core';
+import { useEventBus, whenever } from '@vueuse/core';
 import { useHead } from '@vueuse/head';
-import { VotingEventUser } from 'app/../packages/shared/models';
 import DialogLogin from 'components/DialogLogin.vue';
 import { signOut } from 'firebase/auth';
 import {
-  collection, doc, getDoc, getDocs, limitToLast, orderBy, query, Timestamp, where,
+  Timestamp, collection, getDocs, limitToLast, orderBy, query, where,
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { Dialog, Loading, Notify } from 'quasar';
-import useVotingEvent from 'src/composables/use-voting-event';
+import useVotingEvent, { useVotingEventScopedUser } from 'src/composables/use-voting-event';
 import { getDb, getFns } from 'src/firebase';
 import { provide, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -19,11 +18,9 @@ const router = useRouter();
 const votingEvent = useVotingEvent();
 const auth = useFirebaseAuth();
 const user = useCurrentUser();
-const { state: votingEventUser, execute: refreshVotingEventUser } = useAsyncState(async () => {
-  const docRef = doc(getDb(), 'VotingEvent', votingEvent.value!.uid, 'User', user.value!.uid);
-  const snapshot = await getDoc(docRef);
-  return snapshot.data() as VotingEventUser;
-}, undefined, { immediate: false, throwError: true });
+const { user: votingEventUser, refresh: refreshVotingEventUser } = useVotingEventScopedUser();
+
+const authDialogBus = useEventBus<never>('show-auth-dialog');
 
 const rightDrawerOpen = ref(false);
 
@@ -39,6 +36,10 @@ const showLoginDialog = () => {
       router.push({ name: 'VotingEvent-Vote' });
     });
 };
+
+authDialogBus.on(() => {
+  showLoginDialog();
+});
 
 const logout = async () => {
   const stopLoading = Loading.show();

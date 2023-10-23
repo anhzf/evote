@@ -1,12 +1,13 @@
-import { VotingEvent } from '@anhzf/evote-shared/models';
-import { createGlobalState } from '@vueuse/core';
+import { VotingEvent, VotingEventUser } from '@anhzf/evote-shared/models';
+import { createGlobalState, useAsyncState } from '@vueuse/core';
 import {
-  collection, CollectionReference, limit, query, Timestamp, where,
+  collection, CollectionReference, doc, getDoc, limit, query, Timestamp, where,
 } from 'firebase/firestore';
 import { useDocs } from 'src/composables/use-firestore';
 import { getDb } from 'src/firebase';
 import { computed, inject, Ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useCurrentUser } from 'vuefire';
 
 interface $useVotingEvent {
   (): Ref<VotingEvent | undefined>;
@@ -51,5 +52,25 @@ const _useVotingEvent: $useVotingEvent = () => {
 };
 
 const useVotingEvent = createGlobalState(_useVotingEvent);
+
+export const useVotingEventScopedUser = createGlobalState(() => {
+  const votingEvent = useVotingEvent();
+  const user = useCurrentUser();
+  const { state: votingEventUser, execute: refresh, ...useAsyncStateReturn } = useAsyncState(async () => {
+    if (!votingEvent.value) {
+      throw new Error('Missing voting event data');
+    }
+
+    if (!user.value) {
+      throw new Error('Missing user data');
+    }
+
+    const docRef = doc(getDb(), 'VotingEvent', votingEvent.value!.uid, 'User', user.value!.uid);
+    const snapshot = await getDoc(docRef);
+    return snapshot.data() as VotingEventUser;
+  }, undefined, { immediate: false, throwError: true });
+
+  return { ...useAsyncStateReturn, user: votingEventUser, refresh };
+});
 
 export default useVotingEvent;
