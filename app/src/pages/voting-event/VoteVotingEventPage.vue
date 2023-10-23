@@ -36,6 +36,24 @@ const { state: userToken } = useAsyncState(async () => {
 
 const votables = useVotableList();
 
+const showShouldHaveTokenAlert = () => Notify.create({
+  message: 'Anda harus memiliki token untuk memberi suara.',
+  type: 'warning',
+  position: 'bottom',
+  multiLine: true,
+  timeout: 30_000,
+  progress: true,
+  actions: [
+    {
+      label: 'Tutup', color: 'negative', handler: () => { /*  */ },
+    },
+    {
+      label: 'Masukkan Token',
+      handler: () => authDialogBus.emit(),
+    },
+  ],
+});
+
 const vote = async (voted: string) => {
   const fn = httpsCallable(getFns(), 'voteToken-use');
   const res = await fn({ id: voted });
@@ -43,47 +61,31 @@ const vote = async (voted: string) => {
 };
 
 const onVote = (votable: Votable) => {
-  Dialog.create({
-    title: 'Konfirmasi',
-    message: `Apakah anda yakin untuk memilih "${votable.title}"?`,
-    cancel: true,
-    persistent: true,
-  })
-    .onOk(() => showTheLoadingAndNotifyErrorAsync(async () => {
-      await vote(votable.uid);
+  if (!userToken.value || isTokenUsed(userToken.value)) {
+    authDialogBus.emit();
+    showShouldHaveTokenAlert();
+  } else {
+    Dialog.create({
+      title: 'Konfirmasi',
+      message: `Apakah anda yakin untuk memilih "${votable.title}"?`,
+      cancel: true,
+      persistent: true,
+    })
+      .onOk(() => showTheLoadingAndNotifyErrorAsync(async () => {
+        await vote(votable.uid);
 
-      Dialog.create({
-        title: 'Terima kasih',
-        message: 'Terima kasih telah memberikan suara anda. Silakan logout untuk mengakhiri sesi anda.',
-        persistent: true,
-        color: 'positive',
-      });
-    }));
+        Dialog.create({
+          title: 'Terima kasih',
+          message: 'Terima kasih telah memberikan suara anda. Silakan logout untuk mengakhiri sesi anda.',
+          persistent: true,
+          color: 'positive',
+        });
+      }));
+  }
 };
 
 onMounted(async () => {
-  if (!userToken.value) {
-    Notify.create({
-      message: 'Anda harus memiliki token untuk memberi suara.',
-      type: 'warning',
-      position: 'bottom',
-      multiLine: true,
-      timeout: 30_000,
-      progress: true,
-      actions: [
-        {
-          label: 'Tutup', color: 'negative', handler: () => { /*  */ },
-        },
-        {
-          label: 'Masukkan Token',
-          handler: () => authDialogBus.emit(),
-        },
-        // {
-        //   label: 'Login',
-        // },
-      ],
-    });
-  }
+  if (!userToken.value) showShouldHaveTokenAlert();
 
   if (userToken.value && !isTokenUsed(userToken.value)) {
     Notify.create({

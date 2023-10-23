@@ -42,12 +42,13 @@ const signInWithGoogle = () => {
 <template>
   <q-dialog
     ref="dialogRef"
+    persistent
     @hide="onDialogHide"
   >
     <q-card class="q-dialog-plugin w-full max-w-md">
       <q-card-section class="row justify-between items-center">
         <h2 class="text-h6 m-0">
-          Masuk untuk Memilih
+          Masukkan Token untuk Memilih
         </h2>
 
         <q-btn
