@@ -1,10 +1,21 @@
+<script lang="ts" setup>
+import { getStorage, ref } from 'firebase/storage';
+import { assetUrl } from 'src/utils/asset-url';
+import { Ref, inject } from 'vue';
+import { VotingEvent } from '~/packages/shared/models';
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const votingEvent = inject<Ref<VotingEvent>>('voting-event')!;
+const coverUrl = await assetUrl(ref(getStorage(), `VotingEvent/${votingEvent.value.uid}/cover`).toString());
+</script>
+
 <template>
   <q-page
     padding
     class="column mx-a max-w-screen-lg"
   >
     <q-img
-      src="/assets/mockup/voting-event-banner.jpg"
+      :src="coverUrl"
       :ratio="16/9"
       fit="scale-down"
     />

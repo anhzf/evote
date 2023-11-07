@@ -234,7 +234,15 @@ useHead({
     </q-drawer>
 
     <q-page-container>
-      <router-view v-if="votingEvent" />
+      <suspense>
+        <router-view v-if="votingEvent" />
+
+        <template #fallback>
+          <q-page padding>
+            <q-circular-progress indeterminate />
+          </q-page>
+        </template>
+      </suspense>
     </q-page-container>
   </q-layout>
 </template>

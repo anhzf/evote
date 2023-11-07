@@ -1,44 +1,84 @@
-<script lang="ts" setup>
+<script lang="ts">
 import { VotingEvent } from '@anhzf/evote-shared/models';
-import { computedAsync } from '@vueuse/core';
-import { computed, reactive } from 'vue';
-import { assetUrl } from 'src/utils/asset-url';
+import { computedAsync, syncRefs, watchThrottled } from '@vueuse/core';
 import config from 'src/config';
+import { assetUrl } from 'src/utils/asset-url';
+import {
+  Ref,
+  computed, inject, ref, toRaw, watch,
+} from 'vue';
+import { ref as storageRef, uploadBytes, updateMetadata } from 'firebase/storage';
+import { getStorage } from 'src/firebase';
+import { Loading } from 'quasar';
 
-const props = defineProps({
-  title: {
-    type: String,
-    required: true,
-  },
-  url: {
-    type: String,
-    required: false,
-    default: '',
-  },
-  coverSrc: {
-    type: [String, Blob],
-    required: false,
-    default: 'http://picsum.photos/800/400',
-  },
-});
+export interface Payload extends Pick<VotingEvent, 'title' | 'url'> {
+  coverSrc: string | Blob;
+}
 
-const fields = reactive({
-  ...<Pick<VotingEvent, 'title' | 'url'>>{
-    title: props.title,
-    url: props.url,
-  },
-  coverSrc: props.coverSrc as string | File,
-});
+interface Props {
+  title: string;
+  url?: string;
+  coverSrc?: string | Blob;
+}
 
-const coverUrl = computedAsync(() => assetUrl(fields.coverSrc));
-const finalUrl = computed(() => `${config.publicUrl}/${fields.url}`);
+interface Emits {
+  (e: 'change', value: Payload): void;
+  (e: 'reset'): void;
+}
+
+const uploadCover = async (votingEventId: string, file: File) => {
+  const fileRef = storageRef(getStorage(), `VotingEvent/${votingEventId}/cover`);
+  await uploadBytes(fileRef, file);
+  await updateMetadata(fileRef, {
+    contentType: file.type,
+    customMetadata: {
+      originalName: file.name,
+    },
+  });
+};
+</script>
+
+<script lang="ts" setup>
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const votingEvent = inject<Ref<VotingEvent>>('voting-event')!;
+
+const defaultFields = computed<Payload>(() => ({
+  title: props.title,
+  url: props.url || '',
+  coverSrc: props.coverSrc || 'https://picsum.photos/400/300',
+}));
+
+const fields = ref(toRaw(defaultFields.value));
+syncRefs(defaultFields, fields);
+
+const coverUrl = computedAsync(() => assetUrl(fields.value.coverSrc));
+const finalUrl = computed(() => `${config.publicUrl}/${fields.value.url}`);
 
 const onCoverChange = (e: Event) => {
-  const file = (e.target as HTMLInputElement).files?.[0];
-  if (file) {
-    fields.coverSrc = file;
+  const elm = e.target as HTMLInputElement;
+
+  if (elm.files?.[0]) {
+    // eslint-disable-next-line prefer-destructuring
+    fields.value.coverSrc = elm.files[0];
+    Loading.show();
+    uploadCover(votingEvent.value.uid, elm.files[0])
+      .finally(() => Loading.hide());
+  } else {
+    elm.value = '';
   }
 };
+
+// TODO: Investigate the reactivity issue
+watchThrottled(fields, (v) => {
+  if (JSON.stringify(defaultFields.value) !== JSON.stringify(v)) {
+    emit('change', v);
+  } else {
+    emit('reset');
+  }
+}, { throttle: 500 });
 </script>
 
 <template>

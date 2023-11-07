@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start:emulator": "firebase emulators:start --import firebase-emulator",
+    "start:emulator": "firebase emulators:start --import ./firebase-emulator",
+    "save:emulator": "firebase emulators:export ./firebase-emulator",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

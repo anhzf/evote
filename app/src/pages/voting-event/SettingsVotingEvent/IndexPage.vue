@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { VotingEvent } from '@anhzf/evote-shared/models';
-import { inject, reactive, Ref } from 'vue';
 import { capitalCase } from 'change-case';
-import SectionGeneral from './SectionGeneral.vue';
+import { inject, reactive, Ref } from 'vue';
+import SectionGeneral, { Payload as PayloadGeneral } from './SectionGeneral.vue';
 import SectionSession from './SectionSession.vue';
 
 const SOCIAL_PLATFORMS = ['whatsapp', 'facebook', 'twitter', 'instagram', 'youtube', 'twitch', 'discord', 'web', 'link'];
@@ -23,6 +23,13 @@ const fields = reactive({
   scheduleEnd: '',
   socials: [] as Social[],
 });
+
+const sectionStates = reactive({
+  general: {
+    hasChanged: false,
+    fields: null as (PayloadGeneral | null),
+  },
+});
 </script>
 
 <template>
@@ -34,10 +41,15 @@ const fields = reactive({
       <section-general
         :title="votingEvent.title"
         :url="votingEvent.url"
-        :cover-src="fields.cover"
+        :cover-src="fields.cover || undefined"
+        @change="(sectionStates.general.hasChanged = true, sectionStates.general.fields = $event)"
+        @reset="sectionStates.general.hasChanged = false"
       />
 
-      <q-card-actions align="right">
+      <q-card-actions
+        v-if="sectionStates.general.hasChanged"
+        align="right"
+      >
         <q-btn
           label="Batalkan"
           flat
@@ -75,7 +87,7 @@ const fields = reactive({
             Informasi Publik
           </q-item-label>
 
-          <q-item tag="label">
+          <!-- <q-item tag="label">
             <q-item-section
               side
               top
@@ -86,7 +98,7 @@ const fields = reactive({
             <q-item-section>
               <q-item-label>Tampilkan hasil pemilihan ke publik</q-item-label>
             </q-item-section>
-          </q-item>
+          </q-item> -->
 
           <q-item
             v-for="el in fields.socials"
