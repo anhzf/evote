@@ -6,7 +6,7 @@ dotenv.config()
 concurrently([
   {
     name: 'app',
-    command: 'cd ./packages/shared && npm run build',
+    command: 'cd ./app && npm run build',
   },
   {
     name: 'functions',

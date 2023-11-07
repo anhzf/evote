@@ -3,9 +3,9 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts --fix .",
     "compile": "tsc --noEmit && esbuild src/index.ts --outfile=dist/index.js --bundle --platform=node --target=node18 --external:firebase-admin --external:firebase-functions",
-    "build:watch": "pnpm compile --watch",
-    "build": "pnpm compile --minify",
-    "dev": "pnpm build:watch",
+    "build:watch": "npm run compile --watch",
+    "build": "npm run compile --minify",
+    "dev": "npm run build:watch",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
