@@ -68,8 +68,11 @@ watchOnce(() => showDialog.value === true, () => {
     full-height
   >
     <q-card class="q-dialog-plugin column no-wrap w-full max-w-screen-sm">
-      <q-card-section class="row justify-between items-center">
-        <h6 class="q-my-none">
+      <q-card-section class="row justify-between items-start no-wrap">
+        <h6
+          class="q-my-none"
+          style="text-wrap: balance"
+        >
           {{ title }}
         </h6>
 

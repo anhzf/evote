@@ -124,7 +124,7 @@ watch(votables, (v, old) => {
             :title="el.title"
             :subtitle="el.subtitle"
             :img-src="el.thumbnailSrc"
-            :desc="el.desc && JSON.parse(el.desc)"
+            :desc="el.desc"
             @vote="onVote(el)"
           />
         </div>

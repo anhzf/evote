@@ -1,4 +1,4 @@
-import { Votable } from '@anhzf/evote-shared/models';
+import { sortVotables, Votable } from '@anhzf/evote-shared/models';
 import {
   collection, CollectionReference, DocumentReference, QueryDocumentSnapshot, Timestamp,
 } from 'firebase/firestore';
@@ -46,5 +46,5 @@ export const useVotableList: $useVotableList = () => {
   const collectionRef = computed(() => getCollectionRef(votingEvent.value!.uid));
   const snapshot = useDocs(collectionRef);
 
-  return computed<Votable[]>(() => snapshot.value?.docs.map(fromSource) || []);
+  return computed<Votable[]>(() => sortVotables(snapshot.value?.docs.map(fromSource) || []));
 };
