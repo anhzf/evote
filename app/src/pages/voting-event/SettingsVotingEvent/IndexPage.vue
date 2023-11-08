@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import { VotingEvent } from '@anhzf/evote-shared/models';
 import { capitalCase } from 'change-case';
+import { ref } from 'firebase/storage';
+import { getStorage } from 'src/firebase';
+import { assetUrl } from 'src/utils/asset-url';
 import { inject, reactive, Ref } from 'vue';
 import SectionGeneral, { Payload as PayloadGeneral } from './SectionGeneral.vue';
 import SectionSession from './SectionSession.vue';
@@ -17,8 +20,7 @@ interface Social {
 const votingEvent = inject<Ref<VotingEvent>>('voting-event')!;
 
 const fields = reactive({
-  cover: null as (Blob | null),
-  coverUrl: '/assets/mockup/voting-event-banner.jpg',
+  cover: await assetUrl(ref(getStorage(), `VotingEvent/${votingEvent.value.uid}/cover`).toString()),
   scheduleStart: '2022-10-23T09:19',
   scheduleEnd: '',
   socials: [] as Social[],
