@@ -148,28 +148,6 @@ const sectionStates = reactive({
           color="primary"
         />
       </q-card-actions>
-
-      <q-separator spaced />
-
-      <q-card-section>
-        <q-list>
-          <q-item-label header>
-            Lain-lain
-          </q-item-label>
-
-          <q-item>
-            <q-item-section>
-              Atur ulang hasil pemilihan
-            </q-item-section>
-            <q-item-section side>
-              <q-btn
-                label="Reset"
-                color="negative"
-              />
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
     </q-card>
   </q-page>
 </template>

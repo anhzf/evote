@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 
 export interface OperationHandler<T, R = void> {
-  (payload?: T): Promise<R>;
+  (payload: T): Promise<R>;
 }
 
 interface EventHandler<T> {
@@ -35,7 +35,7 @@ export interface OperationDefinition<T, R = void> {
 export const defineOperation = <T, R = void>(definition: OperationDefinition<T, R>): Operation<T, R> => {
   const onBefore: OperationListener<EventHandler<T>>[] = [];
   const onAfter: OperationListener<EventHandler<T>>[] = [];
-  const operation: Operation<T, R> = async (payload?: T): Promise<R> => {
+  const operation: Operation<T, R> = async (payload): Promise<R> => {
     // sequentally call all guards, if guard return true then call next guard, if return false then abort
     await definition.guards?.reduce(async (p, guard) => {
       if (await p) {

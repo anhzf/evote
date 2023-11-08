@@ -136,5 +136,7 @@ watchThrottled(fields, (v) => {
         </q-item-section>
       </q-item>
     </q-list>
+
+    <slot />
   </q-card-section>
 </template>
