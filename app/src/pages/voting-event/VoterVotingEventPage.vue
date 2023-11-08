@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { Voter } from '@anhzf/evote-shared/models';
-import { get } from '@anhzf/evote-shared/utils';
-import { arrayChunks } from 'app/../packages/shared/utils';
+import { arrayChunks, get } from '@anhzf/evote-shared/utils';
 import DialogVoterCsvImporter from 'components/DialogVoterCsvImporter.vue';
 import { FirebaseError } from 'firebase/app';
 import {

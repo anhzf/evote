@@ -28,7 +28,7 @@ const { state: userToken } = useAsyncState(async () => {
     throw new Error("Voting event doesn't exist.");
   }
 
-  const docRef = doc(getDb(), 'VotingEvent', votingEvent.value?.uid, 'VoteToken', user.value.uid);
+  const docRef = doc(getDb(), user.value.uid);
   const snapshot = await getDoc(docRef);
 
   return snapshot.exists() ? snapshot.data() as VoteToken : undefined;
