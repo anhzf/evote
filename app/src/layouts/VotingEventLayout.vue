@@ -10,7 +10,9 @@ import { httpsCallable } from 'firebase/functions';
 import { Dialog, Loading, Notify } from 'quasar';
 import useVotingEvent, { useVotingEventScopedUser } from 'src/composables/use-voting-event';
 import { getDb, getFns } from 'src/firebase';
-import { provide, ref, watch } from 'vue';
+import {
+  onMounted, provide, ref, watch,
+} from 'vue';
 import { useRouter } from 'vue-router';
 import { useCurrentUser, useFirebaseAuth } from 'vuefire';
 

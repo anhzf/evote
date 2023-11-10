@@ -2,6 +2,7 @@
 import { Votable, VoteToken, isTokenUsed } from '@anhzf/evote-shared/models';
 import { useAsyncState, useEventBus } from '@vueuse/core';
 import CardCandidate from 'components/CardCandidate.vue';
+import { signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { Dialog, Notify } from 'quasar';
@@ -10,7 +11,9 @@ import useVotingEvent from 'src/composables/use-voting-event';
 import { getDb, getFns } from 'src/firebase';
 import { showTheLoadingAndNotifyErrorAsync } from 'src/utils/ui';
 import { onMounted, reactive, watch } from 'vue';
-import { useCurrentUser } from 'vuefire';
+import { useCurrentUser, useFirebaseAuth } from 'vuefire';
+
+const AUTO_LOGOUT_TIMEOUT = 30_000;
 
 const _ui = reactive({
   isLoading: true,
@@ -74,12 +77,35 @@ const onVote = (votable: Votable) => {
       .onOk(() => showTheLoadingAndNotifyErrorAsync(async () => {
         await vote(votable.uid);
 
-        Dialog.create({
-          title: 'Terima kasih',
-          message: 'Terima kasih telah memberikan suara anda. Silakan logout untuk mengakhiri sesi anda.',
+        let wantStay = false;
+
+        const thankYouDialog = Dialog.create({
+          title: 'Berhasil Memilih',
+          message: 'Terima kasih telah memberikan suara anda. Anda akan otomatis ter-logout setelah ini.',
           persistent: true,
+          ok: {
+            label: 'Tutup',
+          },
+          cancel: {
+            label: 'Tetap login',
+            color: 'negative',
+            flat: true,
+          },
           color: 'positive',
-        });
+        })
+          .onCancel(() => {
+            wantStay = true;
+          });
+
+        setTimeout(() => {
+          thankYouDialog.hide();
+
+          const auth = useFirebaseAuth();
+
+          if (!auth) throw new Error('Missing internal dependency.');
+
+          if (!wantStay) signOut(auth);
+        }, AUTO_LOGOUT_TIMEOUT);
       }));
   }
 };
