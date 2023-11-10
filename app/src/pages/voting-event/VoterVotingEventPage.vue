@@ -30,6 +30,7 @@ import {
 interface FromSource {
     userId?: string;
     meta: Record<string, any>;
+    isVoted: boolean;
     createdAt: Timestamp;
     updatedAt?: Timestamp;
     deletedAt?: Timestamp;

@@ -11,6 +11,7 @@ import { computed } from 'vue';
 
 const votingEvent = useVotingEvent();
 const votables = useVotableList();
+
 const resultCount = asyncComputed(() => Promise.all([
   ...votables.value.map(async (votable) => {
     const votableRef = doc(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Votable', votable.uid);
@@ -27,11 +28,17 @@ const resultCount = asyncComputed(() => Promise.all([
     const snapshot = await getCountFromServer(voterCollection);
     return snapshot.data().count;
   })(),
+  (async () => {
+    const root = collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'VoteToken');
+    const snapshot = await getCountFromServer(root);
+    return snapshot.data().count;
+  })(),
 ]), <number[]>[]);
 
 const resultPerVotables = computed(() => resultCount.value.slice(0, votables.value.length));
-const resultTotal = computed(() => resultCount.value.at(-1)!);
+const resultTotal = computed(() => resultCount.value.at(-2)!);
 const resultUsed = computed(() => resultPerVotables.value.reduce((a, b) => a + b, 0));
+const totalGeneratedTokens = computed(() => resultCount.value.at(-1)!);
 
 const chartData = computed(() => votables.value.map((el, i) => ({
   label: String(el.title),
@@ -42,10 +49,9 @@ const chartData = computed(() => votables.value.map((el, i) => ({
 <template>
   <q-page padding>
     <div class="flex flex-nowrap justify-evenly max-h-[80vh]">
-      <ResultPieChart
-        :data="chartData"
-        class="w-2/3"
-      />
+      <div class="w-30vw flex flex-col justify-center">
+        <ResultPieChart :data="chartData" />
+      </div>
 
       <div class="w-1/3 flex flex-col justify-center gap-4">
         <div
@@ -57,7 +63,7 @@ const chartData = computed(() => votables.value.map((el, i) => ({
             <div class="text-h6">
               {{ votable.title }}
             </div>
-            <div class="text-h1 text-secondary">
+            <div class="text-h2 text-secondary">
               {{ resultPerVotables.at(i) }} ({{ (resultPerVotables.at(i)! / resultUsed * 100).toFixed(2) }}%)
             </div>
           </div>
@@ -77,6 +83,17 @@ const chartData = computed(() => votables.value.map((el, i) => ({
               </span>
               <span class="text-h4 text-secondary">
                 ({{ (resultUsed * 100 / resultTotal).toFixed(2) }})%
+              </span>
+            </div>
+          </div>
+
+          <div class="flex flex-col ml-2">
+            <div class="text-h6">
+              Total token dibagikan
+            </div>
+            <div>
+              <span class="text-h4 text-secondary">
+                {{ totalGeneratedTokens }}
               </span>
             </div>
           </div>
