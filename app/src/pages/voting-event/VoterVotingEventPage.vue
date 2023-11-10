@@ -24,7 +24,7 @@ import useVotingEvent from 'src/composables/use-voting-event';
 import { FIREBASE_WRITE_LIMIT } from 'src/constants';
 import { getDb } from 'src/firebase';
 import {
-  computed, onMounted, reactive, ref,
+  computed, onMounted, reactive, ref, watch,
 } from 'vue';
 
 interface FromSource {
@@ -71,7 +71,7 @@ const fromSource = (snapshot: QueryDocumentSnapshot<FromSource>): Voter => {
 };
 
 const selected = ref<Voter[]>([]);
-const isVoted = ref(false);
+const isVoted = ref<boolean>();
 const filter = ref('');
 const table = ref<QTable>();
 const pagination = ref<NonNullable<QTableProps['pagination']>>({
@@ -106,7 +106,7 @@ const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = f
       where(sortBy, '<=', `${search}\uf8ff`),
     ] : []),
     orderBy(sortBy, descending ? 'desc' : 'asc'),
-    // ...(isVoted.value ? [] : [where('voted', '==', null)]),
+    ...(typeof isVoted.value === 'boolean' ? [where('isVoted', '==', isVoted.value)] : []),
     ...(rows.value.at(-1) ? [startAfter(get(rows.value.at(-1)!, sortBy))] : []),
 ));
 
@@ -211,6 +211,10 @@ const onDeleteClick = async () => {
 onMounted(() => {
   table.value?.requestServerInteraction();
 });
+
+watch(isVoted, () => {
+  table.value?.requestServerInteraction();
+});
 </script>
 
 <template>
@@ -237,7 +241,8 @@ onMounted(() => {
         <div class="row q-gutter-x-md">
           <q-checkbox
             v-model="isVoted"
-            label="Sudah memilih"
+            :label="isVoted === true ? 'Sudah memilih' : (isVoted === false ? 'Belum memilih' : 'Sudah dan belum memilih')"
+            toggle-indeterminate
             left-label
           />
           <q-input

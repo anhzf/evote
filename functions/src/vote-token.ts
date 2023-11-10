@@ -125,7 +125,7 @@ export const use = functions.https.onCall(async ({id: votableId}, context) => {
       votedAt: Timestamp.now(),
     }),
     voteToken?.voter.update({
-      votedAt: Timestamp.now(),
+      isVoted: true,
     }),
   ]);
 });
