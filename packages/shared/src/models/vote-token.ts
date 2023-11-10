@@ -5,7 +5,7 @@ const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 7);
 
 export interface VoteToken extends Model, SoftDelete {
   voter: string;
-  voted?: string;
+  voted?: string | null;
   points?: number;
   meta: Record<string, any>;
 }
@@ -17,6 +17,7 @@ const create = <T extends RequiredAttributes>(data?: T): VoteToken & T => modelO
   // override
   uid: nanoid(),
   deletedAt: undefined,
+  voted: null,
 }, data));
 
 export const voteTokenOperations = {

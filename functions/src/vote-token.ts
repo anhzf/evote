@@ -119,10 +119,15 @@ export const use = functions.https.onCall(async ({id: votableId}, context) => {
     throw new functions.https.HttpsError('already-exists', 'Vote token already used');
   }
 
-  return void voteTokenRef.update({
-    voted: dbRef.votables(votingEventId).doc(votableId),
-    votedAt: Timestamp.now(),
-  });
+  await Promise.all([
+    voteTokenRef.update({
+      voted: dbRef.votables(votingEventId).doc(votableId),
+      votedAt: Timestamp.now(),
+    }),
+    voteToken?.voter.update({
+      votedAt: Timestamp.now(),
+    }),
+  ]);
 });
 
 // export const onChange = functions.firestore

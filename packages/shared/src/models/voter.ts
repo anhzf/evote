@@ -3,6 +3,7 @@ import { Model, modelOperations } from './model';
 export interface Voter extends Model {
   userId?: string;
   meta: Record<string, any>;
+  votedAt?: Date | null;
 }
 
 interface RequiredAttributes extends Pick<Voter, never> { }
