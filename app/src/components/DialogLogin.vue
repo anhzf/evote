@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import auth from 'actions/auth';
-import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { Notify, QForm, useDialogPluginComponent } from 'quasar';
 import useVotingEvent from 'src/composables/use-voting-event';
 import { getAuth } from 'src/firebase';
@@ -31,11 +31,12 @@ const signInWithVoteToken = async () => {
 const signInWithGoogle = () => {
   const provider = new GoogleAuthProvider();
 
-  return signInWithRedirect(getAuth()!, provider)
+  return signInWithPopup(getAuth()!, provider)
     .then(() => Notify.create({
       message: 'Berhasil masuk',
       color: 'positive',
-    }));
+    }))
+    .finally(() => onDialogOK());
 };
 </script>
 

@@ -23,7 +23,6 @@ export default boot(({ router }) => {
   /** TODO: Refactor to use same logic in NavigationGuard below */
   const watchGuardTransition = singleton(() => {
     const user = useCurrentUser();
-
     watch([() => isRequireAuth(router.currentRoute.value), user], async ([requireAuth, _user]) => {
       await router.isReady();
 
