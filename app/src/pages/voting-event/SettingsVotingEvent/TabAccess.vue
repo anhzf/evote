@@ -2,9 +2,11 @@
 import invitation from 'actions/invitation';
 import { collection } from 'firebase/firestore';
 import {
-  Dialog, QBtn,
+  Dialog,
+  Notify,
+  QBtn,
   QSpace, QTableColumn,
-  patterns, Loading, Notify,
+  patterns,
 } from 'quasar';
 import { useDocs } from 'src/composables/use-firestore';
 import useVotingEvent from 'src/composables/use-voting-event';
@@ -12,10 +14,23 @@ import { getDb } from 'src/firebase';
 import { showTheLoadingAndNotifyErrorAsync } from 'src/utils/ui';
 import { computed } from 'vue';
 
+interface Row {
+  uid: string;
+  displayName: string;
+  role: string;
+  type: 'user' | 'invitation';
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const columns: QTableColumn[] = [
+const columns: QTableColumn<Row>[] = [
   {
-    name: 'displayName', label: 'Nama', field: 'displayName', align: 'left',
+    name: 'displayName',
+    label: 'Nama',
+    field: 'displayName',
+    align: 'left',
+    sortable: true,
+    format: (v, row) => (row.type === 'user' ? v : `${v} (undangan)`),
+    classes: (row: Row) => (row.type === 'invitation' ? 'text-grey-6 italic' : ''),
   },
   {
     name: 'role', label: 'Akses', field: 'role',
@@ -27,10 +42,25 @@ const columns: QTableColumn[] = [
 
 const votingEvent = useVotingEvent();
 const userColl = computed(() => collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'User'));
-// const accessList = useDocs(collectionRef);
+const invitationColl = computed(() => collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Invitation'));
 
-// const users = [];
-const rows = useDocs(userColl);
+const users = useDocs(userColl);
+const invitations = useDocs(invitationColl);
+
+const rows = computed(() => [
+  ...users.value?.docs.map((val) => ({
+    type: 'user',
+    uid: val.id,
+    displayName: val.data().displayName,
+    role: val.data().role,
+  } as Row)) ?? [],
+  ...invitations.value?.docs.map((val) => ({
+    uid: val.id,
+    type: 'invitation',
+    displayName: val.data().email,
+    role: val.data().role,
+  } as Row)) ?? [],
+]);
 
 const onInviteClick = () => {
   Dialog.create({
@@ -65,10 +95,9 @@ const onInviteClick = () => {
 <template>
   <q-table
     :columns
-    :rows="rows?.docs.map(val => ({
-      ...val.data(),
-      uid: val.id,
-    })) ?? []"
+    :rows
+    row-key="uid"
+    :pagination="{sortBy: 'displayName'}"
   >
     <template #top>
       <q-space />
