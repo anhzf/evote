@@ -28,10 +28,18 @@ const isScheduled = computed({
 const onResetClick = () => {
   Dialog.create({
     title: 'Hapus semua suara',
-    message: 'Apakah Anda yakin ingin menghapus semua suara yang sudah masuk?',
+    message: 'Apakah Anda yakin ingin <strong>menghapus semua suara</strong> yang sudah masuk?',
+    html: true,
+    prompt: {
+      model: '',
+      placeholder: 'ketik "KONFIRMASI" untuk melanjutkan',
+      isValid: (v) => v === 'KONFIRMASI',
+    },
     cancel: true,
     persistent: true,
-  }).onOk(async () => {
+  }).onOk(async (confirm) => {
+    if (confirm !== 'KONFIRMASI') return;
+
     Loading.show({ message: 'Menghapus suara...' });
 
     try {
@@ -135,7 +143,7 @@ const onResetClick = () => {
         </q-card>
       </q-expansion-item>
 
-      <q-item>
+      <q-item class="bg-red-1 rounded ">
         <q-item-section>
           Hapus semua suara
         </q-item-section>

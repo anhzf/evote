@@ -1,15 +1,15 @@
 <script lang="ts">
 import { VotingEvent } from '@anhzf/evote-shared/models';
 import { computedAsync, syncRefs, watchThrottled } from '@vueuse/core';
+import { ref as storageRef, updateMetadata, uploadBytes } from 'firebase/storage';
+import { Loading } from 'quasar';
 import config from 'src/config';
+import { getStorage } from 'src/firebase';
 import { assetUrl } from 'src/utils/asset-url';
 import {
   Ref,
-  computed, inject, ref, toRaw, watch,
+  computed, inject, ref, toRaw,
 } from 'vue';
-import { ref as storageRef, uploadBytes, updateMetadata } from 'firebase/storage';
-import { getStorage } from 'src/firebase';
-import { Loading } from 'quasar';
 
 export interface Payload extends Pick<VotingEvent, 'title' | 'url'> {
   coverSrc: string | Blob;

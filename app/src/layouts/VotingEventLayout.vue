@@ -11,7 +11,7 @@ import { Dialog, Loading, Notify } from 'quasar';
 import useVotingEvent, { useVotingEventScopedUser } from 'src/composables/use-voting-event';
 import { getDb, getFns } from 'src/firebase';
 import {
-  onMounted, provide, ref, watch,
+  provide, ref, watch,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCurrentUser, useFirebaseAuth } from 'vuefire';
@@ -116,7 +116,7 @@ useHead({
       height-hint="98"
     >
       <q-toolbar>
-        <q-toolbar-title>
+        <q-toolbar-title class="flex items-center">
           <q-btn
             flat
             :to="{name: 'Home'}"
@@ -125,14 +125,21 @@ useHead({
           </q-btn>
 
           <q-btn
+            v-if="votingEvent"
             flat
             no-caps
             :to="{name: 'VotingEvent'}"
           >
             <h1 class="text-h6 m-0 inline-block">
-              {{ votingEvent?.title }}
+              {{ votingEvent.title }}
             </h1>
           </q-btn>
+
+          <q-skeleton
+            v-else
+            type="rect"
+            class="w-full max-w-lg mx-4"
+          />
         </q-toolbar-title>
 
         <q-btn

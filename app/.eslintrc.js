@@ -105,5 +105,8 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
 
     'no-underscore-dangle': 'off',
+
+    // Let vue/no-parsing-error handle this job
+    'vue/valid-v-bind': 'off',
   },
 };
