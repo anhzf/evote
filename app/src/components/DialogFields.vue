@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useDialogPluginComponent } from 'quasar';
+import { useDialogPluginComponent, type QBtnProps } from 'quasar';
 import { useId, type Component } from 'vue';
 
 defineProps<{
@@ -8,7 +8,11 @@ defineProps<{
     name: string;
     field: Component;
   }[];
-  actions?:{ name: string; action: Component }[];
+  actions?: string | QBtnProps | {
+    name: string;
+    action: Component;
+  }[];
+  isValid?:() => boolean;
 }>();
 
 defineEmits(useDialogPluginComponent.emits);
@@ -64,7 +68,14 @@ const onSubmit = (ev: Event) => {
       </q-card-section>
 
       <q-card-actions>
-        <template v-if="actions">
+        <q-btn
+          v-if="typeof actions === 'string'"
+          type="submit"
+          :form="formId"
+          :label="actions"
+        />
+
+        <template v-else-if="Array.isArray(actions)">
           <component
             v-for="item in actions"
             :key="item.name"
@@ -74,10 +85,18 @@ const onSubmit = (ev: Event) => {
         </template>
 
         <q-btn
+          v-else-if="typeof actions === 'object'"
+          v-bind="actions"
+          type="submit"
+          :form="formId"
+        />
+
+        <q-btn
           v-else
           type="submit"
           :form="formId"
           label="Submit"
+          :disable="isValid ? !isValid() : false"
         />
       </q-card-actions>
     </q-card>

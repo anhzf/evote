@@ -7,7 +7,7 @@ import {
 } from 'vue';
 
 const props = defineProps<{
-  isClosed: boolean;
+  isClosed?: boolean;
 }>();
 
 const votingEvent = inject<Ref<VotingEvent>>('voting-event');

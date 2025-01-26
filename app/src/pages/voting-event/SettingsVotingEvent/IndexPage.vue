@@ -2,13 +2,18 @@
 import {
   computed,
 } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import TabAccess from './TabAccess.vue';
+import TabCandidates from './TabCandidates.vue';
 import TabGeneral from './TabGeneral.vue';
 
+const router = useRouter();
 const route = useRoute();
 
-const tab = computed(() => route.query.tab as string || 'general');
+const tab = computed({
+  get: () => route.query.tab as string || 'general',
+  set: (v) => router.replace({ query: { tab: v } }),
+});
 </script>
 
 <template>
@@ -58,9 +63,10 @@ const tab = computed(() => route.query.tab as string || 'general');
         </q-tab-panel>
 
         <q-tab-panel name="candidate">
-          <q-card>
-            empty
-          </q-card>
+          <tab-candidates
+            flat
+            class="p-0"
+          />
         </q-tab-panel>
 
         <q-tab-panel name="access">
