@@ -42,6 +42,7 @@ export const accept = functions.https.onCall(async (invitationId, context) => {
 
       t.set(votingEventUserRef, <Partial<fromSrc.VotingEventUser>>{
         role: invitation.role,
+        displayName: context.auth?.token?.displayName ?? context.auth?.token?.email,
       });
     }
   });
