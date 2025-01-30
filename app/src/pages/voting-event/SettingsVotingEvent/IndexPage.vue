@@ -14,6 +14,11 @@ const tab = computed({
   get: () => route.query.tab as string || 'general',
   set: (v) => router.replace({ query: { tab: v } }),
 });
+
+const onNeedRefresh = async (name: string) => {
+  await router.replace({ query: { tab: '$temp' } });
+  tab.value = name;
+};
 </script>
 
 <template>
@@ -59,6 +64,7 @@ const tab = computed({
           <tab-general
             flat
             class="p-0"
+            @need-refresh="onNeedRefresh('general')"
           />
         </q-tab-panel>
 
@@ -66,6 +72,7 @@ const tab = computed({
           <tab-candidates
             flat
             class="p-0"
+            @need-refresh="onNeedRefresh('candidate')"
           />
         </q-tab-panel>
 
@@ -73,6 +80,7 @@ const tab = computed({
           <tab-access
             flat
             class="p-0"
+            @need-refresh="onNeedRefresh('access')"
           />
         </q-tab-panel>
       </q-tab-panels>
