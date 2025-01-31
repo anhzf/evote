@@ -21,6 +21,10 @@ interface Row {
   type: 'user' | 'invitation';
 }
 
+const emit = defineEmits<{
+  'need-refresh': [],
+}>();
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const columns: QTableColumn<Row>[] = [
   {
@@ -54,12 +58,14 @@ const rows = computed(() => [
     displayName: val.data().displayName,
     role: val.data().role,
   } as Row)) ?? [],
-  ...invitations.value?.docs.map((val) => ({
-    uid: val.id,
-    type: 'invitation',
-    displayName: val.data().email,
-    role: val.data().role,
-  } as Row)) ?? [],
+  ...invitations.value?.docs
+    .filter((val) => val.data().acceptedAt === null)
+    .map((val) => ({
+      uid: val.id,
+      type: 'invitation',
+      displayName: val.data().email,
+      role: val.data().role,
+    } as Row)) ?? [],
 ]);
 
 const onInviteClick = () => {
@@ -82,6 +88,8 @@ const onInviteClick = () => {
         votingEventId: votingEvent.value!.uid,
         email,
       });
+
+      emit('need-refresh');
 
       Notify.create({
         type: 'positive',
