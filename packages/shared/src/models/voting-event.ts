@@ -6,6 +6,11 @@ export interface VotingEvent extends Model {
   isArchived: boolean;
   isClosed: boolean;
   isResultPublished: boolean;
+  socials: {
+    type: string;
+    url: string;
+    label: string;
+  }[];
 }
 
 interface RequiredAttributes extends Pick<VotingEvent, 'title'> { }
@@ -20,6 +25,7 @@ const create = <T extends RequiredAttributes>(data?: T): VotingEvent & T => mode
   isArchived: false,
   isClosed: false,
   isResultPublished: false,
+  socials: [],
 }, data));
 
 export const votingEventOperations = {

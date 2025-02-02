@@ -131,7 +131,7 @@ watchThrottled(fields, (v) => {
           <q-input
             v-model="fields.url"
             label="Alamat URL"
-            :hint="finalUrl"
+            :hint="`Anda dapat mengakses acara ini melalui: ${finalUrl}`"
           />
         </q-item-section>
       </q-item>

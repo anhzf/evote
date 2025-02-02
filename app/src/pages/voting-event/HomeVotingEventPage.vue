@@ -1,5 +1,7 @@
 <script lang="ts" setup>
+import DefineState from 'components/DefineState.vue';
 import { getStorage, ref } from 'firebase/storage';
+import { SOCIAL_PLATFORMS } from 'src/constants';
 import { assetUrl } from 'src/utils/asset-url';
 import { Ref, inject } from 'vue';
 import { VotingEvent } from '~/packages/shared/models';
@@ -26,16 +28,24 @@ const coverUrl = await assetUrl(ref(getStorage(), `VotingEvent/${votingEvent.val
       </h2>
 
       <ul class="list-none m-0 p-0 flex gap-4">
-        <li>
-          <q-btn
-            label="smpn23surakarta.sch.id"
-            icon="mdi-web"
-            flat
-            href="https://smpn23surakarta.sch.id/"
-            target="_blank"
-          />
+        <li
+          v-for="(social, i) in votingEvent.socials ?? []"
+          :key="i"
+        >
+          <DefineState
+            :value="SOCIAL_PLATFORMS[social.type as keyof typeof SOCIAL_PLATFORMS]"
+            #="{state: [platform]}"
+          >
+            <q-btn
+              :label="social.label"
+              :icon="platform?.icon"
+              flat
+              :href="platform?.getUrl(social.url)"
+              target="_blank"
+            />
+          </DefineState>
         </li>
-        <li>
+        <!-- <li>
           <q-btn
             label="SMP Negeri 23 Surakarta Official"
             icon="mdi-youtube"
@@ -61,7 +71,7 @@ const coverUrl = await assetUrl(ref(getStorage(), `VotingEvent/${votingEvent.val
             href="https://www.instagram.com/smpnegeri23surakarta_official/"
             target="_blank"
           />
-        </li>
+        </li> -->
       </ul>
     </section>
   </q-page>
