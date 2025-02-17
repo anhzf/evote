@@ -295,7 +295,7 @@ watch(isVoted, () => {
 
       <template #body-cell-meta="props">
         <q-td :props="props">
-          <div class="row gap-x-0.5">
+          <div class="row items-center gap-x-0.5">
             <q-chip
               v-for="(label, key) in props.value"
               :key="key"
@@ -306,6 +306,13 @@ watch(isVoted, () => {
               <span>{{ key }}: </span>
               <span class="font-semibold">{{ label }}</span>
             </q-chip>
+
+            <q-icon
+              name="check_circle"
+              :color="props.row.isVoted ? 'positive' : 'grey'"
+              size="1rem"
+              class="ml-2"
+            />
           </div>
         </q-td>
       </template>
