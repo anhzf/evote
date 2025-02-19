@@ -58,7 +58,12 @@ const { state: parsed, isLoading, execute } = useAsyncState(parseCSV, []);
 const saveImportedData = async () => {
   _ui.isImportingLoading = true;
 
-  const voters = parsed.value.map((el) => voterOperations.create({ meta: el }));
+  const voters = parsed.value.map((el) => voterOperations.create({
+    meta: el,
+    $search: {
+      tags: Object.entries(el).map(([key, value]) => `${key}:${value}`),
+    },
+  }));
   await saveVoterBatch(voters);
   _ui.isImportingLoading = false;
 };

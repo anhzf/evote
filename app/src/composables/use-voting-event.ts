@@ -5,7 +5,7 @@ import {
 } from 'firebase/firestore';
 import { useDocs } from 'src/composables/use-firestore';
 import { getDb } from 'src/firebase';
-import { computed, inject, Ref } from 'vue';
+import { computed, Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCurrentUser } from 'vuefire';
 

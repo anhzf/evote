@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Voter } from '@anhzf/evote-shared/models';
+import { HasSearchableFields, Voter } from '@anhzf/evote-shared/models';
 import { arrayChunks, get } from '@anhzf/evote-shared/utils';
 import DialogVoterCsvImporter from 'components/DialogVoterCsvImporter.vue';
 import { FirebaseError } from 'firebase/app';
@@ -27,7 +27,7 @@ import {
   computed, onMounted, reactive, ref, watch,
 } from 'vue';
 
-interface FromSource {
+interface FromSource extends HasSearchableFields {
     userId?: string;
     meta: Record<string, any>;
     isVoted: boolean;
@@ -67,13 +67,18 @@ const getVoterListCount = async (q: Query = collection(getDb(), 'VotingEvent', v
 const fromSource = (snapshot: QueryDocumentSnapshot<FromSource>): Voter => {
   const data = snapshot.data();
   return {
-    ...data, createdAt: data.createdAt.toDate(), updatedAt: data.updatedAt?.toDate(), deletedAt: data.deletedAt?.toDate(), uid: snapshot.id,
+    ...data,
+    createdAt: data.createdAt.toDate(),
+    updatedAt: data.updatedAt?.toDate(),
+    deletedAt: data.deletedAt?.toDate(),
+    uid: snapshot.id,
   };
 };
 
 const selected = ref<Voter[]>([]);
 const isVoted = ref<boolean>();
 const filter = ref('');
+const filterTag = ref('');
 const table = ref<QTable>();
 const pagination = ref<NonNullable<QTableProps['pagination']>>({
   sortBy: 'meta.NAMA',
@@ -99,17 +104,31 @@ const columns = computed<QTableColumn<Voter>[]>(() => [
   ...appendColumns,
 ]);
 
-const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = false) => (query(
+const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = false) => {
+  let q: Query<FromSource> = query(
     collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Voter') as CollectionReference<FromSource>,
-    // Remove where filter if there's no search input
-    ...(search ? [
-      where(sortBy, '>=', search),
-      where(sortBy, '<=', `${search}\uf8ff`),
-    ] : []),
-    orderBy(sortBy, descending ? 'desc' : 'asc'),
-    ...(typeof isVoted.value === 'boolean' ? [where('isVoted', '==', isVoted.value)] : []),
-    ...(rows.value.at(-1) ? [startAfter(get(rows.value.at(-1)!, sortBy))] : []),
-));
+  );
+
+  if (search) {
+    q = query(q, where(sortBy, '>=', search), where(sortBy, '<=', `${search}\uf8ff`));
+  }
+
+  if (filterTag.value) {
+    q = query(q, where('$search.tags', 'array-contains', filterTag.value));
+  }
+
+  q = query(q, orderBy(sortBy, descending ? 'desc' : 'asc'));
+
+  if (typeof isVoted.value === 'boolean') {
+    q = query(q, where('isVoted', '==', isVoted.value));
+  }
+
+  if (rows.value.at(-1)) {
+    q = query(q, startAfter(get(rows.value.at(-1)!, sortBy)));
+  }
+
+  return q;
+};
 
 /**
  * TODO: Refactor to composables
@@ -213,7 +232,7 @@ onMounted(() => {
   table.value?.requestServerInteraction();
 });
 
-watch(isVoted, () => {
+watch([isVoted, filterTag], () => {
   table.value?.requestServerInteraction();
 });
 </script>
@@ -239,13 +258,30 @@ watch(isVoted, () => {
       @request="onTableRequest"
     >
       <template #top-right>
-        <div class="row q-gutter-x-md">
+        <div class="row q-gutter-x-md items-center">
+          <q-chip
+            v-if="filterTag"
+            size="0.7rem"
+            clickable
+            class="q-mx-none"
+            @click="filterTag = ''"
+          >
+            <span>{{ filterTag.split(':').at(0) }}:</span>
+            <strong>{{ filterTag.split(':').at(1) }}</strong>
+
+            <q-icon
+              name="close"
+              class="ml-1 text-gray"
+            />
+          </q-chip>
+
           <q-checkbox
             v-model="isVoted"
             :label="isVoted === true ? 'Sudah memilih' : (isVoted === false ? 'Belum memilih' : 'Sudah dan belum memilih')"
             toggle-indeterminate
             left-label
           />
+
           <q-input
             v-model.trim.lazy="filter"
             label="Cari..."
@@ -302,6 +338,7 @@ watch(isVoted, () => {
               size="0.7rem"
               clickable
               class="q-mx-none"
+              @click="filterTag = `${key}:${label}`"
             >
               <span>{{ key }}: </span>
               <span class="font-semibold">{{ label }}</span>

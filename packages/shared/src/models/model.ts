@@ -11,6 +11,12 @@ export interface SoftDelete {
   deletedAt?: Date;
 }
 
+export interface HasSearchableFields {
+  $search: {
+    tags?: `${string}:${string}`[];
+  };
+}
+
 interface RequiredAttributes extends Pick<Model, never> { }
 
 const create = <T extends RequiredAttributes>(data?: T): Model & T => Object.assign({

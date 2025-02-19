@@ -45,33 +45,6 @@ const coverUrl = await assetUrl(ref(getStorage(), `VotingEvent/${votingEvent.val
             />
           </DefineState>
         </li>
-        <!-- <li>
-          <q-btn
-            label="SMP Negeri 23 Surakarta Official"
-            icon="mdi-youtube"
-            flat
-            href="https://www.youtube.com/@smpnegeri23surakartaoffici12"
-            target="_blank"
-          />
-        </li>
-        <li>
-          <q-btn
-            label="SMPN 23 Surakarta"
-            icon="mdi-facebook"
-            flat
-            href="https://facebook.com/smpnegeri23surakarta/"
-            target="_blank"
-          />
-        </li>
-        <li>
-          <q-btn
-            label="@smpnegeri23surakarta_official"
-            icon="mdi-instagram"
-            flat
-            href="https://www.instagram.com/smpnegeri23surakarta_official/"
-            target="_blank"
-          />
-        </li> -->
       </ul>
     </section>
   </q-page>
