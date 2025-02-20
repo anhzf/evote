@@ -7,11 +7,12 @@ import {
 import { useVotableList } from 'src/composables/use-votable';
 import useVotingEvent from 'src/composables/use-voting-event';
 import { getDb } from 'src/firebase';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const votingEvent = useVotingEvent();
 const votables = useVotableList();
 
+const isLoading = ref(false);
 const resultCount = asyncComputed(() => Promise.all([
   ...votables.value.map(async (votable) => {
     const votableRef = doc(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Votable', votable.uid);
@@ -33,7 +34,9 @@ const resultCount = asyncComputed(() => Promise.all([
     const snapshot = await getCountFromServer(root);
     return snapshot.data().count;
   })(),
-]), <number[]>[]);
+]), <number[]>[], {
+  evaluating: isLoading,
+});
 
 const resultPerVotables = computed(() => resultCount.value.slice(0, votables.value.length));
 const resultTotal = computed(() => resultCount.value.at(-2)!);
@@ -50,31 +53,75 @@ const chartData = computed(() => votables.value.map((el, i) => ({
   <q-page padding>
     <div class="flex flex-nowrap justify-evenly max-h-[80vh]">
       <div class="w-30vw flex flex-col justify-center">
-        <ResultPieChart :data="chartData" />
+        <ResultPieChart
+          v-if="!isLoading"
+          :data="chartData"
+        />
+        <div
+          v-else
+          class="self-center w-full h-full flex flex-col items-center gap-2.5"
+        >
+          <div class="grow aspect-square">
+            <q-skeleton
+              type="circle"
+              class="w-full h-full"
+            />
+          </div>
+          <div class="max-w-90% flex justify-center gap-1">
+            <q-skeleton
+              v-for="i in 3"
+              :key="i"
+              width="9rem"
+              height="1.5rem"
+            />
+          </div>
+        </div>
       </div>
 
       <div class="w-1/3 flex flex-col justify-center gap-4">
-        <div
-          v-for="(votable, i) in votables"
-          :key="votable.uid"
-          class="flex items-center"
-        >
-          <div class="flex flex-col ml-2">
-            <div class="text-h6">
-              {{ votable.title }}
-            </div>
-            <div class="text-h2 text-secondary">
-              {{ resultPerVotables.at(i) }} ({{ (resultPerVotables.at(i)! / resultUsed * 100).toFixed(2) }}%)
+        <template v-if="!isLoading">
+          <div
+            v-for="(votable, i) in votables"
+            :key="votable.uid"
+            class="flex items-center"
+          >
+            <div class="flex flex-col ml-2">
+              <div class="text-h6">
+                {{ votable.title }}
+              </div>
+              <div class="text-h2 text-secondary">
+                {{ resultPerVotables.at(i) }} ({{ (resultPerVotables.at(i)! / resultUsed * 100).toFixed(2) }}%)
+              </div>
             </div>
           </div>
-        </div>
+        </template>
+        <template v-else>
+          <div
+            v-for="i in 3"
+            :key="i"
+            class="flex items-center"
+          >
+            <div class="flex flex-col ml-2 gap-1">
+              <q-skeleton
+                width="8rem"
+                height="1.5rem"
+              />
+              <q-skeleton
+                width="20rem"
+                height="4rem"
+              />
+            </div>
+          </div>
+        </template>
+
         <q-separator />
+
         <div class="flex items-center">
           <div class="flex flex-col ml-2">
             <div class="text-h6">
               Total suara masuk
             </div>
-            <div>
+            <div v-if="!isLoading">
               <span class="text-h1 text-accent">
                 {{ resultUsed }}
               </span>
@@ -85,6 +132,11 @@ const chartData = computed(() => votables.value.map((el, i) => ({
                 ({{ (resultUsed * 100 / resultTotal).toFixed(2) }})%
               </span>
             </div>
+            <q-skeleton
+              v-else
+              width="15rem"
+              height="5rem"
+            />
           </div>
 
           <div class="flex flex-col ml-2">
@@ -92,9 +144,17 @@ const chartData = computed(() => votables.value.map((el, i) => ({
               Total token dibagikan
             </div>
             <div>
-              <span class="text-h4 text-secondary">
+              <span
+                v-if="!isLoading"
+                class="text-h4 text-secondary"
+              >
                 {{ totalGeneratedTokens }}
               </span>
+              <q-skeleton
+                v-else
+                width="10rem"
+                height="2.5rem"
+              />
             </div>
           </div>
         </div>
