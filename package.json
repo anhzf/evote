@@ -20,5 +20,8 @@
     "./app",
     "./functions",
     "./packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@nuxt/ui": "^3.1.0"
+  }
 }

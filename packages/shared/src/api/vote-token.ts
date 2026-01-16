@@ -1,4 +1,3 @@
-import { createHash } from 'crypto';
 import { runTransaction } from 'firebase/firestore';
 import { customAlphabet } from 'nanoid';
 import * as v from 'valibot';
@@ -13,7 +12,11 @@ export const makeEntity = createEntity(VoteTokenPath, VoteToken);
 const makeSessionInternalEntity = createEntity(SessionInternalPath, SessionInternal);
 
 const hashToken = shouldOnServer(
-  (voter: IEntity<typeof VoterPath, typeof Voter>, sessionInternal: IEntity<typeof SessionInternalPath, typeof SessionInternal>): string => {
+  async (
+    voter: IEntity<typeof VoterPath, typeof Voter>,
+    sessionInternal: IEntity<typeof SessionInternalPath, typeof SessionInternal>
+  ): Promise<string> => {
+    const { createHash } = await import('crypto');
     const content = [
       voter.path,
       sessionInternal.data.tokenSalt,
@@ -36,7 +39,7 @@ export const create = shouldOnServer(
       const sessionInternal = makeSessionInternalEntity(await trx.get(sessionInternalDoc));
       const expiresAt = new Date(now.getTime() + expInHours * 3600_000);
       const tokenPayload = v.parse(VoteToken, {
-        hash: hashToken(voter, sessionInternal),
+        hash: await hashToken(voter, sessionInternal),
         metadata: {
           labels: voter.data.labels,
         },

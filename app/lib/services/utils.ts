@@ -1,3 +1,3 @@
 import { serviceRegistry } from '~/lib/services/registry';
 
-export const isServer = serviceRegistry.register(() => import.meta.server);
+export const isServer = serviceRegistry.register(() => import.meta.env.SSR);

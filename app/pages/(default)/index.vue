@@ -60,7 +60,7 @@ useSeoMeta({
           <USkeleton
             v-for="i in 5"
             :key="i"
-            class="h-20"
+            class="h-20 cursor-loading"
           />
         </div>
       </div>

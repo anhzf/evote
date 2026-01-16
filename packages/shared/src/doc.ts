@@ -21,7 +21,7 @@ export class DocPath<P extends string> {
   /**
    * @returns resolved path with params
    */
-  get path() {
+  get path(): string {
     return this.segments.map((segment) => {
       const matcher = /{(.+)}/;
       const isParam = matcher.test(segment);
@@ -35,7 +35,7 @@ export class DocPath<P extends string> {
     }).join('/');
   }
 
-  get params() {
+  get params(): ParamsOf<P> {
     return this.segmentsTemplate.reduce(
       (params, segment, i) => /{.+}/.test(segment)
         ? { ...params, [segment.slice(1, -1)]: this.segments[i] }
@@ -44,7 +44,7 @@ export class DocPath<P extends string> {
     );
   }
 
-  static template<P extends string>(path: P) {
+  static template<P extends string>(path: P): DocPath<P> {
     const template = new DocPath<P>(path);
     template.segmentsTemplate = path.split('/').filter(Boolean);
     return template;
@@ -80,15 +80,15 @@ export class DocPath<P extends string> {
     return this.fills(params as typeof this.params);
   }
 
-  childTemplate<PC extends string>(path: PC) {
+  childTemplate<PC extends string>(path: PC): DocPath<`${P}/${PC}`> {
     return DocPath.template(`${this.path}/${path}`) as DocPath<`${P}/${PC}`>;
   }
 
-  toString() {
+  toString(): string {
     return this.path;
   }
 
-  toJSON() {
+  toJSON(): { path: string } {
     return { path: this.path };
   }
 
