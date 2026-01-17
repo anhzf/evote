@@ -10,14 +10,12 @@ const { isLoading } = useImage({ src: coverSrc });
     <img
       v-if="!isLoading"
       :src="coverSrc"
-      class="w-full aspect-[2/1] object-cover"
-    >
+      class="w-full aspect-2/1 object-cover"
+    />
 
     <USkeleton
       v-else
-      class="w-full aspect-[2/1]"
+      class="w-full aspect-2/1"
     />
-
-
   </div>
 </template>

@@ -25,7 +25,7 @@ const renderMarkdown = async (content: string) => {
         <USkeleton
           v-for="i in 3"
           :key="i"
-          class="aspect-[4/5]"
+          class="aspect-4/5"
         />
       </template>
 
@@ -46,35 +46,39 @@ const renderMarkdown = async (content: string) => {
             >
               <div class="absolute top-full inset-x-0">
                 <span
-                  class="inline-block w-full text-center text-(--ui-text-muted) pointer-events-none -translate-y-full opacity-0 group-hover:opacity-100 group-hover:translate-y-1/3 transition-transform duration-200"
+                  class="inline-block w-full text-center text-muted pointer-events-none -translate-y-full opacity-0 group-hover:opacity-100 group-hover:translate-y-1/3 transition-transform duration-200"
                 >
                   Click to view details
                 </span>
               </div>
 
               <div
-                class="relative flex flex-col bg-(--ui-bg) border border-(--ui-border-accented) rounded-(--ui-radius) overflow-hidden hover:shadow-2xl hover:rounded-2xl transition-[box-shadow,border-radius]"
+                class="relative flex flex-col bg-default border border-accented rounded-radius overflow-hidden hover:shadow-2xl hover:rounded-2xl transition-[box-shadow,border-radius]"
               >
                 <img
                   :src="`https://i.pravatar.cc/500?u=${JSON.stringify(votable.id)}`"
-                  class="w-full aspect-[4/5] object-cover"
+                  class="w-full aspect-4/5 object-cover"
                   :alt="votable.data.title"
                 >
 
                 <div class="p-4 text-center">
-                  <h2 class="text-xl font-semibold">{{ votable.data.title }}</h2>
-                  <p class="text-(--ui-text-muted)">{{ votable.data.subtitle }}</p>
+                  <h2 class="text-xl font-semibold">
+                    {{ votable.data.title }}
+                  </h2>
+                  <p class="text-muted">
+                    {{ votable.data.subtitle }}
+                  </p>
                 </div>
               </div>
             </div>
 
             <template #content>
               <UContainer class="flex flex-col lg:flex-row gap-4 lg:gap-12 overflow-y-auto">
-                <div class="h-[45vh] aspect-[4/5] p-4 lg:p-0">
+                <div class="h-[45vh] aspect-4/5 p-4 lg:p-0">
                   <UseImage :src="`https://i.pravatar.cc/500?u=${JSON.stringify(votable.id)}`">
                     <img
                       :src="`https://i.pravatar.cc/500?u=${JSON.stringify(votable.id)}`"
-                      class="size-full bg-(--ui-bg-accented) object-cover"
+                      class="size-full bg-accented object-cover"
                       :alt="votable.data.title"
                     >
 
@@ -90,7 +94,7 @@ const renderMarkdown = async (content: string) => {
                       <h2 class="text-4xl font-bold">
                         {{ votable.data.title }}
                       </h2>
-                      <span class="text-(--ui-text-muted) italic">
+                      <span class="text-muted italic">
                         {{ votable.data.subtitle }}
                       </span>
                     </div>

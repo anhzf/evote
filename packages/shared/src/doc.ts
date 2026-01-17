@@ -88,7 +88,7 @@ export class DocPath<P extends string> {
     return this.path;
   }
 
-  toJSON(): { path: string } {
+  toJSON(): { path: string; } {
     return { path: this.path };
   }
 

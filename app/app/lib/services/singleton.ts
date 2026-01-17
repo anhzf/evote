@@ -1,11 +1,11 @@
+import { serviceRegistry } from '@anhzf/evote-shared';
 import { DocPath } from '@anhzf/evote-shared/src/doc';
 import { QueryClient } from '@tanstack/vue-query';
 import SuperJSON, { deserialize, serialize } from 'superjson';
-import { serviceRegistry } from '~/lib/services/registry';
 
 SuperJSON.registerClass(DocPath);
 
-export const getQueryClient = serviceRegistry.register(() => new QueryClient({
+export const getQueryClient = serviceRegistry.register('queryClient', () => new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { DropdownMenuItem } from '@nuxt/ui';
 import { useQuery } from '@tanstack/vue-query';
 import { useCurrentUser, useSignIn, useSignOut } from '~/lib/queries/auth';
 
@@ -6,6 +7,35 @@ const { data: user, isLoading: isUserLoading } = useQuery(useCurrentUser());
 
 const { mutate: signIn } = useSignIn();
 const { mutate: signOut } = useSignOut();
+
+const userMenuItems = computed<DropdownMenuItem[]>(() => {
+  if (user.value) {
+    return [
+      [
+        {
+          label: user.value.displayName,
+          avatar: {
+            src: user.value.photoURL,
+            alt: user.value.displayName,
+            size: 'sm',
+            preload: true,
+          },
+          type: 'label',
+        },
+      ],
+      [
+        {
+          label: 'Keluar',
+          as: 'button',
+          onSelect: () => signOut(),
+          icon: 'i-lucide-log-out'
+        },
+      ],
+    ];
+  }
+
+  return [];
+});
 
 useHead({
   link: [
@@ -19,7 +49,7 @@ useHead({
 </script>
 
 <template>
-  <div class="sticky top-0 inset-x-0 bg-(--ui-bg) border-b border-(--ui-border-muted)">
+  <div class="sticky top-0 inset-x-0 bg-default border-b border-muted">
     <UContainer class="h-16 flex justify-between items-center gap-4 ">
       <slot />
 
@@ -30,14 +60,7 @@ useHead({
             class="flex items-center gap-2"
           >
             <UDropdownMenu
-              :items="[
-                [
-                  { label: user.displayName, avatar: { src: user.photoURL, alt: user.displayName, size: 'sm' } },
-                ],
-                [
-                  { label: 'Sign out', as: 'button', onSelect: () => signOut(), icon: 'i-lucide-log-out' },
-                ],
-              ]"
+              :items="userMenuItems"
               :ui="{
                 content: 'min-w-40',
               }"

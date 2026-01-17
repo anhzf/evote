@@ -5,22 +5,24 @@ import { useSessions } from '~/lib/queries/session';
 const { data, isLoading } = useQuery(useSessions());
 
 useSeoMeta({
-  title: 'Sessions',
+  title: 'Acara',
 });
 </script>
 
 <template>
-  <div class="bg-(--ui-bg-muted) min-h-screen flex flex-col">
+  <div class="bg-muted min-h-screen flex flex-col">
     <AppTopNav>
-      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">
-        Evote
-      </h1>
+      <ULink to="/">
+        <h1 class="text-2xl font-bold text-highlighted">
+          Evote
+        </h1>
+      </ULink>
     </AppTopNav>
 
     <UContainer class="grow w-full flex flex-col gap-8">
       <div class="py-8 flex flex-col gap-4">
         <h2 class="text-xl font-bold">
-          Sessions
+          Acara Terbaru
         </h2>
 
         <ul
@@ -38,14 +40,14 @@ useSeoMeta({
                 <NuxtLink :to="`/${el.url}`">
                   <span class="absolute inset-0 z-10" />
 
-                  <div class="size-2 bg-(--ui-success) rounded-full inline-block absolute top-4 right-4" />
+                  <div class="size-2 bg-success rounded-full inline-block absolute top-4 right-4" />
 
                   <span class="font-medium">
                     {{ el.title }}
                   </span>
                 </NuxtLink>
 
-                <span class="text-sm text-(--ui-text-muted)">
+                <span class="text-sm text-muted">
                   {{ id }}
                 </span>
               </div>

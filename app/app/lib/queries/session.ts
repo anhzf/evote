@@ -5,7 +5,6 @@ export const useSessionByUrl = (url: string) => {
   return queryOptions({
     queryKey: ['session', url],
     queryFn: () => {
-      console.debug(`session: ${url}`);
       return sessionApi.findByUrl(url);
     },
   });

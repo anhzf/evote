@@ -11,13 +11,13 @@ export const Path = SessionPath;
 export const makeEntity = createEntity(SessionPath, Session);
 
 export const all = async () => {
-  const coll = SessionPath.toCollectionRef();
+  const coll = Path.toCollectionRef();
   const snapshots = await getDocs(coll);
   return snapshots.docs.map(makeEntity);
 };
 
 export const findByUrl = async (url: string) => {
-  const coll = doc(getFirestore(), SessionPath.path).parent;
+  const coll = doc(getFirestore(), Path.path).parent;
   const q = query(coll, where('url', '==', url), limit(1));
   const snapshots = await getDocs(q);
   const [snap] = snapshots.docs;
@@ -33,7 +33,7 @@ export const CreateSchema = v.object({
  * @returns string id of created session
  */
 export const create = async ({ userId, ...data }: v.InferOutput<typeof CreateSchema>) => {
-  const coll = SessionPath.toCollectionRef();
+  const coll = Path.toCollectionRef();
   const doc = await addDoc(coll, data);
   return doc.id;
 };

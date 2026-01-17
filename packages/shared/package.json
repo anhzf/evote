@@ -20,13 +20,11 @@
   },
   "homepage": "https://github.com/anhzf/evote#readme",
   "devDependencies": {
-    "firebase-functions": "^6.2.0",
-    "typescript": "^5.2.2"
+    "firebase-functions": "^7.0.3",
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "nanoid": "^5.0.2"
-  },
-  "dependencies": {
-    "firebase": "^11.1.0"
+    "firebase": "^12.8.0",
+    "nanoid": "^5.1.6"
   }
 }

@@ -6,10 +6,10 @@ export default defineNuxtConfig({
       },
     }
   },
-  compatibilityDate: '2024-11-27',
   future: {
     compatibilityVersion: 4
   },
+  compatibilityDate: '2026-01-16',
   experimental: {
     componentIslands: {
       selectiveClient: true,

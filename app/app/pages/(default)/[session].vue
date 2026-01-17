@@ -13,11 +13,17 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="bg-(--ui-bg-muted) min-h-screen flex flex-col">
+  <div class="bg-muted min-h-screen flex flex-col">
     <AppTopNav>
       <div class="flex items-center gap-4">
+        <ULink to="/">
+          <h1 class="text-2xl font-bold text-dimmed">
+            Evote /
+          </h1>
+        </ULink>
+
         <ULink :to="{ name: 'session', params: { session: session?.data.url } }">
-          <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">
+          <h1 class="text-2xl font-bold text-highlighted">
             {{ session?.data.title }}
           </h1>
         </ULink>
