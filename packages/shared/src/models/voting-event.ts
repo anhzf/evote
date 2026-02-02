@@ -6,6 +6,12 @@ export interface VotingEvent extends Model {
   isArchived: boolean;
   isClosed: boolean;
   isResultPublished: boolean;
+  policies?: {
+    /**
+     * If true, vote tokens do not expire.
+     */
+    noTokenExpiration?: boolean;
+  };
   socials: {
     type: string;
     url: string;

@@ -26,12 +26,18 @@ export const get = functions.https.onCall(async (data, context) => {
 
   return getDb().runTransaction<VoteToken>(async (t) => {
     const collectionRef = dbRef.voteTokens(votingEventId);
+    const votingEventRef = dbRef.votingEvents().doc(votingEventId);
     const voterRef = dbRef.voters(votingEventId).doc(voterId);
+
+    const votingEvent = await t.get(votingEventRef);
+    if (!votingEvent.exists) {
+      throw new functions.https.HttpsError('not-found', 'Voting event not found');
+    }
 
     const query = collectionRef.where('voter', '==', voterRef);
     const snapshots = await t.get(query);
 
-    type TokenGroups = Record<'used'| 'available'| 'expired', QueryDocumentSnapshot<fromSrc.VoteToken>[]>
+    type TokenGroups = Record<'used' | 'available'| 'expired', QueryDocumentSnapshot<fromSrc.VoteToken>[]>
 
     // Group tokens by availability
     const tokens = snapshots.docs.reduce<TokenGroups>((acc, doc) => {
@@ -46,7 +52,7 @@ export const get = functions.https.onCall(async (data, context) => {
 
       if (expiredAt > Timestamp.now().toMillis()) {
         acc.available.push(doc);
-      } else {
+      } else if (!votingEvent.data()?.policies?.noTokenExpiration) {
         acc.expired.push(doc);
       }
 
