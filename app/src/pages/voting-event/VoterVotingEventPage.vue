@@ -2,6 +2,7 @@
 import { HasSearchableFields, Voter } from '@anhzf/evote-shared/models';
 import { arrayChunks, get } from '@anhzf/evote-shared/utils';
 import DialogVoterCsvImporter from 'components/DialogVoterCsvImporter.vue';
+import DialogAddVoter from 'components/DialogAddVoter.vue';
 import { FirebaseError } from 'firebase/app';
 import {
   collection,
@@ -12,14 +13,14 @@ import {
   orderBy,
   Query,
   query,
-  QueryDocumentSnapshot, startAfter, Timestamp,
+  QueryDocumentSnapshot, QueryFieldFilterConstraint, startAfter, Timestamp,
   where,
   writeBatch,
 } from 'firebase/firestore';
-import TokenViewer from 'pages/voting-event/VoterVotingEvent/TokenViewer.vue';
 import {
   Dialog, Notify, QTable, QTableColumn, QTableProps,
 } from 'quasar';
+import TokenViewer from 'pages/voting-event/VoterVotingEvent/TokenViewer.vue';
 import useVotingEvent from 'src/composables/use-voting-event';
 import { FIREBASE_WRITE_LIMIT } from 'src/constants';
 import { getDb } from 'src/firebase';
@@ -104,36 +105,34 @@ const columns = computed<QTableColumn<Voter>[]>(() => [
   ...appendColumns,
 ]);
 
-const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = false) => {
-  let q: Query<FromSource> = query(
-    collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Voter') as CollectionReference<FromSource>,
-  );
-
-  if (search) {
-    q = query(q, where(sortBy, '>=', search), where(sortBy, '<=', `${search}\uf8ff`));
-  }
-
-  if (filterTag.value) {
-    q = query(q, where('$search.tags', 'array-contains', filterTag.value));
-  }
-
-  q = query(q, orderBy(sortBy, descending ? 'desc' : 'asc'));
-
-  if (typeof isVoted.value === 'boolean') {
-    q = query(q, where('isVoted', '==', isVoted.value));
-  }
-
-  if (rows.value.at(-1)) {
-    q = query(q, startAfter(get(rows.value.at(-1)!, sortBy)));
-  }
-
-  return q;
-};
-
 /**
  * TODO: Refactor to composables
  */
 const onTableRequest: QTableProps['onRequest'] = async (req) => {
+  const preConditions = [
+    filterTag.value ? where('$search.tags', 'array-contains', filterTag.value) : null,
+    typeof isVoted.value === 'boolean' ? where('isVoted', '==', isVoted.value) : null,
+  ].filter(Boolean) as QueryFieldFilterConstraint[];
+
+  const buildQuery = (start = 0, search = '', sortBy = 'meta.NAMA', descending = false) => {
+    let q: Query<FromSource> = query(
+      collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Voter') as CollectionReference<FromSource>,
+      ...preConditions,
+    );
+
+    if (search) {
+      q = query(q, where(sortBy, '>=', search), where(sortBy, '<=', `${search}\uf8ff`));
+    }
+
+    q = query(q, orderBy(sortBy, descending ? 'desc' : 'asc'));
+
+    if (rows.value.at(-1)) {
+      q = query(q, startAfter(get(rows.value.at(-1)!, sortBy)));
+    }
+
+    return q;
+  };
+
   _ui.isLoading = true;
 
   const {
@@ -173,9 +172,10 @@ const onTableVirtualScroll: QTableProps['onVirtualScroll'] = async () => {
 };
 
 const onAddVoterClick = () => {
-  Notify.create({
-    message: 'Fitur ini belum tersedia',
-    color: 'warning',
+  Dialog.create({
+    component: DialogAddVoter,
+  }).onOk(() => {
+    table.value?.requestServerInteraction();
   });
 };
 
@@ -235,6 +235,14 @@ onMounted(() => {
 watch([isVoted, filterTag], () => {
   table.value?.requestServerInteraction();
 });
+
+const onAddVoterManuallyClick = () => {
+  Dialog.create({
+    component: DialogAddVoter,
+  }).onOk(() => {
+    table.value?.requestServerInteraction();
+  });
+};
 </script>
 
 <template>
@@ -314,6 +322,20 @@ watch([isVoted, filterTag], () => {
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>Impor CSV</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                v-close-popup
+                @click="onAddVoterManuallyClick"
+              >
+                <q-item-section avatar>
+                  <q-icon
+                    name="person_add"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Tambah Manual</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
