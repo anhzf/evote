@@ -21,6 +21,7 @@ const _ui = reactive({
 
 const authDialogBus = useEventBus<never>('show-auth-dialog');
 
+const auth = useFirebaseAuth();
 const user = useCurrentUser();
 
 const votingEvent = useVotingEvent();
@@ -98,9 +99,12 @@ const onVote = (votable: Votable) => {
           });
 
         setTimeout(() => {
-          thankYouDialog.hide();
-
-          const auth = useFirebaseAuth();
+          // The user may close the dialog before the timeout.
+          try {
+            thankYouDialog?.hide();
+          } catch (err) {
+            console.error(err);
+          }
 
           if (!auth) throw new Error('Missing internal dependency.');
 

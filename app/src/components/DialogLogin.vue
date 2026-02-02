@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import auth from 'actions/auth';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { Notify, QForm, useDialogPluginComponent } from 'quasar';
+import {
+  Dialog, Notify, QForm, useDialogPluginComponent,
+} from 'quasar';
 import useVotingEvent from 'src/composables/use-voting-event';
 import { getAuth } from 'src/firebase';
 import { reactive, ref } from 'vue';
@@ -21,21 +23,39 @@ const _ui = reactive({
 
 const signInWithVoteToken = async () => {
   _ui.isLoading = true;
-  if (votingEvent.value) {
-    await auth.loginVoteToken({ votingEventId: votingEvent.value.uid, voteToken: token.value });
+
+  try {
+    if (votingEvent.value) {
+      await auth.loginVoteToken({ votingEventId: votingEvent.value.uid, voteToken: token.value });
+    }
+    onDialogOK();
+  } catch (err: unknown) {
+    Dialog.create({
+      title: 'Gagal Masuk',
+      color: 'negative',
+      message: String(err),
+    });
+  } finally {
+    _ui.isLoading = false;
   }
-  _ui.isLoading = false;
-  onDialogOK();
 };
 
 const signInWithGoogle = () => {
   const provider = new GoogleAuthProvider();
 
   return signInWithPopup(getAuth()!, provider)
-    .then(() => Notify.create({
-      message: 'Berhasil masuk',
-      color: 'positive',
-    }))
+    .then(() => {
+      Notify.create({
+        message: 'Berhasil masuk',
+        color: 'positive',
+      });
+    })
+    .catch((err) => {
+      Notify.create({
+        message: String(err),
+        color: 'negative',
+      });
+    })
     .finally(() => onDialogOK());
 };
 </script>

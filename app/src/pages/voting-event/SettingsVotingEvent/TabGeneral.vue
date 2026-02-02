@@ -59,12 +59,12 @@ const onSocialsSubmit = () => {
     <AsyncState
       :value="assetUrl(fields.cover)"
       init="#"
-      #="{state: coverUrl}"
+      #="{state: coverUrl, error}"
     >
       <section-general
         :title="votingEvent!.title"
         :url="votingEvent!.url"
-        :cover-src="coverUrl"
+        :cover-src="!error ? coverUrl : 'https://placehold.co/200x150?text=No+cover+image'"
         @change="(sectionStates.general.hasChanged = true, sectionStates.general.fields = $event)"
         @reset="sectionStates.general.hasChanged = false"
       />
