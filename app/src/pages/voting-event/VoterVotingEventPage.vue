@@ -18,9 +18,10 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import {
-  Dialog, Notify, QTable, QTableColumn, QTableProps,
+  Dialog, Notify, QTable, QTableColumn, QTableProps, Loading,
 } from 'quasar';
 import TokenViewer from 'pages/voting-event/VoterVotingEvent/TokenViewer.vue';
+import VoteToken from 'src/actions/vote-token';
 import useVotingEvent from 'src/composables/use-voting-event';
 import { FIREBASE_WRITE_LIMIT } from 'src/constants';
 import { getDb } from 'src/firebase';
@@ -236,12 +237,93 @@ watch([isVoted, filterTag], () => {
   table.value?.requestServerInteraction();
 });
 
+const exportTokens = async () => {
+  Loading.show({ message: 'Mengekspor token pemilih...' });
+
+  const xlsx = await import('xlsx');
+
+  try {
+    // Fetch all voters and tokens in parallel
+    const voterCollectionRef = collection(getDb(), 'VotingEvent', votingEvent.value!.uid, 'Voter');
+    const [votersSnapshot, tokensData] = await Promise.all([
+      getDocs(voterCollectionRef),
+      VoteToken.getAll({ votingEventId: votingEvent.value!.uid }),
+    ]);
+
+    // Convert voters to a map for easy lookup
+    const votersMap = new Map<string, Voter>();
+    votersSnapshot.docs.forEach((voterDoc) => {
+      const voter = fromSource(voterDoc as QueryDocumentSnapshot<FromSource>);
+      votersMap.set(voter.uid!, voter);
+    });
+
+    // Combine tokens with voter data
+    const tokens = [...tokensData.tokens.created, ...tokensData.tokens.existing];
+    const combinedData = tokens.map((token) => {
+      const voterId = token.voter.split('/').pop() || '';
+      const voter = votersMap.get(voterId);
+
+      // Flatten meta fields
+      const metaFields = voter?.meta || {};
+
+      return {
+        Token: token.uid,
+        'Voter ID': voterId,
+        'Is Voted': voter?.isVoted || false,
+        'Voted At': token.voted ? (token.updatedAt?.toISOString() || '') : '',
+        ...metaFields, // Spread flattened meta fields
+        'Token Created At': token.createdAt.toISOString(),
+        'Token Updated At': token.updatedAt?.toISOString() || '',
+        // 'User ID': voter?.userId || '',
+      };
+    });
+
+    const worksheet = xlsx.utils.json_to_sheet(combinedData);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Vote Tokens');
+
+    xlsx.writeFile(workbook, `voting-event-${votingEvent.value!.uid}-vote-tokens.xlsx`);
+
+    Notify.create({
+      message: `Berhasil mengekspor ${combinedData.length} token pemilih`,
+      color: 'positive',
+    });
+  } catch (error) {
+    if (error instanceof FirebaseError) {
+      Notify.create({
+        message: error.message,
+        color: 'negative',
+      });
+    }
+
+    console.error(error);
+  } finally {
+    Loading.hide();
+  }
+};
+
 const onAddVoterManuallyClick = () => {
   Dialog.create({
     component: DialogAddVoter,
+    componentProps: {
+      'v-on:refreshTable': console.log,
+    },
   }).onOk(() => {
     table.value?.requestServerInteraction();
   });
+};
+
+const onExportClick = async () => {
+  Dialog.create({
+    title: 'Konfirmasi ekspor token pemilih',
+    // eslint-disable-next-line max-len
+    message: 'Dengan mengekspor Anda akan membuat token untuk setiap pemilih yang ada. Proses ini mungkin memakan waktu cukup lama jika jumlah pemilih banyak. Apakah Anda yakin ingin mengekspor token pemilih?',
+    cancel: true,
+    persistent: true,
+  })
+    .onOk(() => {
+      exportTokens();
+    });
 };
 </script>
 
@@ -265,6 +347,21 @@ const onAddVoterManuallyClick = () => {
       class="flex-grow max-h-80vh w-full max-w-7xl"
       @request="onTableRequest"
     >
+      <template #top-left>
+        <div class="row items-center gap-x-xs">
+          <h6 class="m-0">
+            Daftar Pemilih
+          </h6>
+          <q-btn
+            type="button"
+            icon="refresh"
+            round
+            flat
+            @click="table?.requestServerInteraction()"
+          />
+        </div>
+      </template>
+
       <template #top-right>
         <div class="row q-gutter-x-md items-center">
           <q-chip
@@ -340,6 +437,13 @@ const onAddVoterManuallyClick = () => {
               </q-item>
             </q-list>
           </q-btn-dropdown>
+
+          <q-btn
+            label="Ekspor"
+            unelevated
+            icon="download"
+            @click="onExportClick"
+          />
 
           <q-btn
             v-if="selected.length"

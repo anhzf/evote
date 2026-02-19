@@ -1,65 +1,6 @@
-<template>
-  <q-dialog @hide="onHide">
-    <q-card class="q-dialog-plugin w-full max-w-400px">
-      <q-card-section>
-        <h6 class="q-my-none">
-          Add Voter
-        </h6>
-      </q-card-section>
-
-      <form @submit="onSubmit">
-        <q-card-section>
-          <q-input
-            v-model="voter.meta.NAMA"
-            label="Nama"
-            :rules="[ val => val !== null && val !== '' || 'Please enter Nama']"
-            required
-          />
-          <q-input
-            v-model="voter.meta.STATUS"
-            label="Status"
-            :rules="[ val => val !== null && val !== '' || 'Please enter Status']"
-            required
-          />
-          <q-select
-            v-model="voter.meta.KELAMIN"
-            :options="[
-              {
-                label: 'Laki-laki',
-                value: 'L',
-              },
-              {
-                label: 'Perempuan',
-                value: 'P',
-              },
-            ]"
-            label="Jenis Kelamin"
-            :rules="[ val => val !== null && val !== '' || 'Please select Kelamin']"
-            required
-          />
-        </q-card-section>
-
-        <q-card-actions>
-          <q-btn
-            label="Tambahkan"
-            type="submit"
-            color="primary"
-          />
-          <q-btn
-            label="Cancel"
-            color="grey"
-            flat
-            v-close-popup
-          />
-        </q-card-actions>
-      </form>
-    </q-card>
-  </q-dialog>
-</template>
-
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { useQuasar } from 'quasar';
+import { useDialogPluginComponent, useQuasar } from 'quasar';
 import { addDoc, collection, CollectionReference } from 'firebase/firestore';
 import { getDb } from 'src/firebase';
 import { Voter } from '@anhzf/evote-shared/models';
@@ -80,7 +21,11 @@ const voter = ref<Omit<Voter, 'uid'>>({ // Initialize without uid
   $search: { tags: [] },
 });
 
-const emit = defineEmits(['refreshTable']);
+const emit = defineEmits(['refreshTable', ...useDialogPluginComponent.emits]);
+
+const {
+  dialogRef, onDialogHide, onDialogOK, onDialogCancel,
+} = useDialogPluginComponent();
 
 const onSubmit = async () => {
   try {
@@ -96,11 +41,15 @@ const onSubmit = async () => {
       createdAt: new Date(),
       $search: { tags: [] }, // Initialize $search
     };
-    await addDoc(voterCollectionRef, newVoter);
+
+    const newDoc = await addDoc(voterCollectionRef, newVoter);
     $q.notify({
       message: 'Voter added successfully',
       color: 'positive',
     });
+
+    onDialogOK({ id: newDoc.id });
+
     emit('refreshTable');
     voter.value = { // Reset without uid
       meta: { NAMA: '', STATUS: '', KELAMIN: '' },
@@ -129,3 +78,67 @@ const onHide = () => {
   };
 };
 </script>
+
+<template>
+  <q-dialog
+    ref="dialogRef"
+    @hide="onHide"
+  >
+    <q-card class="q-dialog-plugin w-full max-w-400px">
+      <q-card-section>
+        <h6 class="q-my-none">
+          Add Voter
+        </h6>
+      </q-card-section>
+
+      <q-form @submit="onSubmit">
+        <q-card-section>
+          <q-input
+            v-model="voter.meta.NAMA"
+            label="Nama"
+            :rules="[ val => val !== null && val !== '' || 'Please enter Nama']"
+            required
+          />
+          <q-input
+            v-model="voter.meta.STATUS"
+            label="Status"
+            :rules="[ val => val !== null && val !== '' || 'Please enter Status']"
+            required
+          />
+          <q-select
+            v-model="voter.meta.KELAMIN"
+            :options="[
+              {
+                label: 'Laki-laki',
+                value: 'L',
+              },
+              {
+                label: 'Perempuan',
+                value: 'P',
+              },
+            ]"
+            label="Jenis Kelamin"
+            :rules="[ val => val !== null && val !== '' || 'Please select Kelamin']"
+            required
+            emit-value
+            map-options
+          />
+        </q-card-section>
+
+        <q-card-actions>
+          <q-btn
+            label="Tambahkan"
+            type="submit"
+            color="primary"
+          />
+          <q-btn
+            label="Cancel"
+            color="grey"
+            flat
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-form>
+    </q-card>
+  </q-dialog>
+</template>

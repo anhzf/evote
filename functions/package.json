@@ -2,7 +2,7 @@
   "name": "@anhzf/evote-functions",
   "scripts": {
     "lint": "eslint --ext .js,.ts --fix .",
-    "compile": "tsc --noEmit && esbuild src/index.ts --outfile=dist/index.js --bundle --platform=node --target=node18 --external:firebase-admin --external:firebase-functions",
+    "compile": "tsc --noEmit && esbuild src/index.ts --outfile=dist/index.js --bundle --platform=node --target=node20 --external:firebase-admin --external:firebase-functions",
     "build:watch": "npm run compile -- --watch",
     "build": "npm run compile --minify",
     "dev": "npm run build:watch",
@@ -13,7 +13,7 @@
     "logs": "firebase functions:log"
   },
   "engines": {
-    "node": "18"
+    "node": "20"
   },
   "main": "dist/index.js",
   "dependencies": {

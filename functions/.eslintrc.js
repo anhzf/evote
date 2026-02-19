@@ -30,5 +30,6 @@ module.exports = {
     'max-len': ['error', {'code': 150}],
     // let the @typescript-eslint/no-unused-vars handle this
     'no-unused-vars': 'off',
+    'valid-jsdoc': 'off',
   },
 };
